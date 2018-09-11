@@ -1,0 +1,10 @@
+arguments.o: arguments.cc ../../libs/util/strings.h \
+  ../../libs/util/defines.h ../../libs/util/tokenizer.h \
+  ../../libs/util/arguments.h ../../libs/util/exception.h
+file_system.o: file_system.cc ../../libs/util/exception.h \
+  ../../libs/util/defines.h ../../libs/util/system.h \
+  ../../libs/util/file_system.h
+ini_parser.o: ini_parser.cc ../../libs/util/exception.h \
+  ../../libs/util/defines.h ../../libs/util/strings.h \
+  ../../libs/util/ini_parser.h
+system.o: system.cc ../../libs/util/system.h ../../libs/util/defines.h

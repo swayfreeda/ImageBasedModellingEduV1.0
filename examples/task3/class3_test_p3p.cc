@@ -1,0 +1,1 @@
+// Created by sway on 2018/8/25./* * POSIT (Pose from Orthography and Scaling with iterations), 比例正交 * 投影迭代变换算法，适用条件是物体在Z轴方向的厚度远小于其在Z轴方向的平均深度。 */int main(int argc, char*argv[]){    return 0;}

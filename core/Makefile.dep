@@ -1,0 +1,124 @@
+bundle.o: bundle.cc ../../libs/mve/bundle.h ../../libs/mve/camera.h \
+  ../../libs/mve/defines.h ../../libs/mve/mesh.h \
+  ../../libs/math/vector.h ../../libs/math/defines.h \
+  ../../libs/math/algo.h
+bundle_io.o: bundle_io.cc ../../libs/util/file_system.h \
+  ../../libs/util/defines.h ../../libs/util/strings.h \
+  ../../libs/util/exception.h ../../libs/math/matrix.h \
+  ../../libs/math/defines.h ../../libs/math/algo.h \
+  ../../libs/math/vector.h ../../libs/mve/bundle_io.h \
+  ../../libs/mve/bundle.h ../../libs/mve/camera.h \
+  ../../libs/mve/defines.h ../../libs/mve/mesh.h
+camera.o: camera.cc ../../libs/math/matrix_tools.h \
+  ../../libs/math/defines.h ../../libs/math/matrix.h \
+  ../../libs/math/algo.h ../../libs/math/vector.h \
+  ../../libs/mve/camera.h ../../libs/mve/defines.h
+depthmap.o: depthmap.cc ../../libs/math/defines.h \
+  ../../libs/math/matrix.h ../../libs/math/algo.h \
+  ../../libs/math/vector.h ../../libs/mve/mesh_info.h \
+  ../../libs/mve/defines.h ../../libs/mve/mesh.h \
+  ../../libs/mve/depthmap.h ../../libs/mve/camera.h \
+  ../../libs/mve/image.h ../../libs/math/functions.h \
+  ../../libs/mve/image_base.h ../../libs/util/strings.h \
+  ../../libs/util/defines.h ../../libs/mve/mesh_tools.h
+image_exif.o: image_exif.cc ../../libs/util/system.h \
+  ../../libs/util/defines.h ../../libs/util/strings.h \
+  ../../libs/mve/image_exif.h ../../libs/mve/defines.h
+image_io.o: image_io.cc ../../libs/math/algo.h ../../libs/math/defines.h \
+  ../../libs/util/exception.h ../../libs/util/defines.h \
+  ../../libs/util/strings.h ../../libs/util/system.h \
+  ../../libs/mve/image_io.h ../../libs/mve/defines.h \
+  ../../libs/mve/image.h ../../libs/math/functions.h \
+  ../../libs/math/vector.h ../../libs/math/matrix.h \
+  ../../libs/mve/image_base.h
+image_tools.o: image_tools.cc ../../libs/mve/camera.h \
+  ../../libs/mve/defines.h ../../libs/mve/image_tools.h \
+  ../../libs/util/exception.h ../../libs/util/defines.h \
+  ../../libs/math/accum.h ../../libs/math/functions.h \
+  ../../libs/math/defines.h ../../libs/math/vector.h \
+  ../../libs/math/algo.h ../../libs/math/matrix.h ../../libs/mve/image.h \
+  ../../libs/mve/image_base.h ../../libs/util/strings.h
+marching.o: marching.cc ../../libs/mve/defines.h
+mesh.o: mesh.cc ../../libs/math/defines.h ../../libs/math/functions.h \
+  ../../libs/math/vector.h ../../libs/math/algo.h \
+  ../../libs/math/matrix.h ../../libs/mve/mesh.h \
+  ../../libs/mve/defines.h
+mesh_info.o: mesh_info.cc ../../libs/mve/mesh_info.h \
+  ../../libs/mve/defines.h ../../libs/mve/mesh.h \
+  ../../libs/math/vector.h ../../libs/math/defines.h \
+  ../../libs/math/algo.h
+mesh_io.o: mesh_io.cc ../../libs/util/strings.h ../../libs/util/defines.h \
+  ../../libs/mve/mesh.h ../../libs/math/vector.h \
+  ../../libs/math/defines.h ../../libs/math/algo.h \
+  ../../libs/mve/defines.h ../../libs/mve/mesh_io.h \
+  ../../libs/mve/mesh_io_ply.h ../../libs/util/system.h \
+  ../../libs/mve/image.h ../../libs/math/functions.h \
+  ../../libs/math/matrix.h ../../libs/mve/image_base.h \
+  ../../libs/mve/camera.h ../../libs/mve/view.h \
+  ../../libs/mve/mesh_io_off.h ../../libs/mve/mesh_io_npts.h \
+  ../../libs/mve/mesh_io_pbrt.h ../../libs/mve/mesh_io_smf.h \
+  ../../libs/mve/mesh_io_obj.h
+mesh_io_npts.o: mesh_io_npts.cc ../../libs/util/exception.h \
+  ../../libs/util/defines.h ../../libs/math/vector.h \
+  ../../libs/math/defines.h ../../libs/math/algo.h ../../libs/mve/mesh.h \
+  ../../libs/mve/defines.h ../../libs/mve/mesh_io_npts.h
+mesh_io_obj.o: mesh_io_obj.cc ../../libs/util/strings.h \
+  ../../libs/util/defines.h ../../libs/util/tokenizer.h \
+  ../../libs/util/exception.h ../../libs/util/file_system.h \
+  ../../libs/mve/mesh_io_obj.h ../../libs/mve/mesh.h \
+  ../../libs/math/vector.h ../../libs/math/defines.h \
+  ../../libs/math/algo.h ../../libs/mve/defines.h
+mesh_io_off.o: mesh_io_off.cc ../../libs/math/vector.h \
+  ../../libs/math/defines.h ../../libs/math/algo.h \
+  ../../libs/util/exception.h ../../libs/util/defines.h \
+  ../../libs/mve/mesh_io_off.h ../../libs/mve/defines.h \
+  ../../libs/mve/mesh.h
+mesh_io_pbrt.o: mesh_io_pbrt.cc ../../libs/util/exception.h \
+  ../../libs/util/defines.h ../../libs/mve/mesh_io_pbrt.h \
+  ../../libs/mve/mesh.h ../../libs/math/vector.h \
+  ../../libs/math/defines.h ../../libs/math/algo.h \
+  ../../libs/mve/defines.h
+mesh_io_ply.o: mesh_io_ply.cc ../../libs/util/exception.h \
+  ../../libs/util/defines.h ../../libs/util/tokenizer.h \
+  ../../libs/util/strings.h ../../libs/math/vector.h \
+  ../../libs/math/defines.h ../../libs/math/algo.h \
+  ../../libs/math/matrix.h ../../libs/mve/depthmap.h \
+  ../../libs/mve/defines.h ../../libs/mve/camera.h \
+  ../../libs/mve/image.h ../../libs/math/functions.h \
+  ../../libs/mve/image_base.h ../../libs/mve/mesh.h \
+  ../../libs/mve/mesh_io_ply.h ../../libs/util/system.h \
+  ../../libs/mve/view.h
+mesh_io_smf.o: mesh_io_smf.cc ../../libs/util/exception.h \
+  ../../libs/util/defines.h ../../libs/mve/mesh_io_smf.h \
+  ../../libs/mve/mesh.h ../../libs/math/vector.h \
+  ../../libs/math/defines.h ../../libs/math/algo.h \
+  ../../libs/mve/defines.h
+mesh_tools.o: mesh_tools.cc ../../libs/math/algo.h \
+  ../../libs/math/defines.h ../../libs/math/vector.h \
+  ../../libs/mve/mesh_info.h ../../libs/mve/defines.h \
+  ../../libs/mve/mesh.h ../../libs/mve/mesh_tools.h \
+  ../../libs/math/matrix.h
+scene.o: scene.cc ../../libs/util/exception.h ../../libs/util/defines.h \
+  ../../libs/util/timer.h ../../libs/util/file_system.h \
+  ../../libs/mve/scene.h ../../libs/mve/defines.h ../../libs/mve/view.h \
+  ../../libs/mve/camera.h ../../libs/mve/image_base.h \
+  ../../libs/util/strings.h ../../libs/mve/image.h \
+  ../../libs/math/functions.h ../../libs/math/defines.h \
+  ../../libs/math/vector.h ../../libs/math/algo.h \
+  ../../libs/math/matrix.h ../../libs/mve/bundle.h ../../libs/mve/mesh.h \
+  ../../libs/mve/bundle_io.h
+view.o: view.cc ../../libs/util/exception.h ../../libs/util/defines.h \
+  ../../libs/util/file_system.h ../../libs/util/tokenizer.h \
+  ../../libs/util/strings.h ../../libs/util/ini_parser.h \
+  ../../libs/mve/view.h ../../libs/mve/defines.h ../../libs/mve/camera.h \
+  ../../libs/mve/image_base.h ../../libs/mve/image.h \
+  ../../libs/math/functions.h ../../libs/math/defines.h \
+  ../../libs/math/vector.h ../../libs/math/algo.h \
+  ../../libs/math/matrix.h ../../libs/mve/image_io.h
+volume.o: volume.cc ../../libs/math/vector.h ../../libs/math/defines.h \
+  ../../libs/math/algo.h ../../libs/mve/marching_tets.h \
+  ../../libs/math/functions.h ../../libs/math/matrix.h \
+  ../../libs/mve/defines.h ../../libs/mve/mesh.h \
+  ../../libs/mve/marching_cubes.h ../../libs/mve/image.h \
+  ../../libs/mve/image_base.h ../../libs/util/strings.h \
+  ../../libs/util/defines.h ../../libs/mve/volume.h
