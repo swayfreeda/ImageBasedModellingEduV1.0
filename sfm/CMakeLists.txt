@@ -26,6 +26,12 @@ set(HEADERS
         ba_cholesky.h
         extract_focal_length.h
         triangulate.h
+        bundler_features.h
+        bundler_matching.h
+        bundler_intrinsics.h
+        bundler_tracks.h
+        bundler_incremental.h
+        bundler_init_pair.h
         )
 
 set(SOURCE_FILES
@@ -43,7 +49,13 @@ set(SOURCE_FILES
         ba_linear_solver.cc
         extract_focal_length.cc
         triangulate.cc
+        bundler_features.cc
+        bundler_matching.cc
+        bundler_intrinsics.cc
+        bundler_tracks.cc
+        bundler_incremental.cc
+        bundler_init_pair.cc
         )
 add_library(sfm ${HEADERS} ${SOURCE_FILES})
-target_link_libraries(sfm core util features)
+#target_link_libraries(sfm core util features)
 

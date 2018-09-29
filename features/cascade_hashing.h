@@ -17,14 +17,14 @@
 #include "math/functions.h"
 #include "math/vector.h"
 #include "sfm/defines.h"
-#include "sfm/exhaustive_matching.h"
-#include "sfm/matching.h"
-#include "sfm/sift.h"
-#include "sfm/surf.h"
+#include "features/exhaustive_matching.h"
+#include "features/matching.h"
+#include "features/sift.h"
+#include "features/surf.h"
 #include "util/system.h"
 #include "util/timer.h"
 
-SFM_NAMESPACE_BEGIN
+FEATURES_NAMESPACE_BEGIN
 
 class CascadeHashing : public ExhaustiveMatching
 {
@@ -48,7 +48,7 @@ public:
      * Initialize matcher by computing cascade hashes of the SIFT/SURF
      * descriptors.
      */
-    void init (bundler::ViewportList* viewports) override;
+    void init (sfm::bundler::ViewportList* viewports) override;
 
     /** Matches all feature types yielding a single matching result. */
     void pairwise_match (int view_1_id, int view_2_id,
@@ -470,6 +470,6 @@ CascadeHashing::collect_top_ranked_candidates (
     }
 }
 
-SFM_NAMESPACE_END
+FEATURES_NAMESPACE_END
 
 #endif /* SFM_CASCADE_HASHING_HEADER */
