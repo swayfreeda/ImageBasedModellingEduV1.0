@@ -12,11 +12,11 @@
 
 #include <string>
 
-#include "mve/defines.h"
-#include "mve/mesh.h"
+#include "core/defines.h"
+#include "core/mesh.h"
 
-MVE_NAMESPACE_BEGIN
-MVE_GEOM_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_GEOM_NAMESPACE_BEGIN
 
 /**
  * Auto-detects filetype from extension and delegates to readers.
@@ -30,7 +30,7 @@ load_mesh (std::string const& filename);
 void
 save_mesh (TriangleMesh::ConstPtr mesh, std::string const& filename);
 
-MVE_GEOM_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_GEOM_NAMESPACE_END
+CORE_NAMESPACE_END
 
 #endif /* MVE_MESH_IO_HEADER */

@@ -15,11 +15,11 @@
 
 #include "util/exception.h"
 #include "math/vector.h"
-#include "mve/mesh.h"
-#include "mve/mesh_io_npts.h"
+#include "core/mesh.h"
+#include "core/mesh_io_npts.h"
 
-MVE_NAMESPACE_BEGIN
-MVE_GEOM_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_GEOM_NAMESPACE_BEGIN
 
 TriangleMesh::Ptr
 load_npts_mesh (std::string const& filename, bool format_binary)
@@ -97,5 +97,5 @@ save_npts_mesh (TriangleMesh::ConstPtr mesh,
     out.close();
 }
 
-MVE_GEOM_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_GEOM_NAMESPACE_END
+CORE_NAMESPACE_END

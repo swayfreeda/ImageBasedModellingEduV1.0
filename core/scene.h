@@ -18,8 +18,8 @@
 #include "core/view.h"
 #include "core/bundle.h"
 
-#define MVE_SCENE_VIEWS_DIR "views/"
-#define MVE_SCENE_BUNDLE_FILE "synth_0.out"
+#define CORE_SCENE_VIEWS_DIR "views/"
+#define CORE_SCENE_BUNDLE_FILE "synth_0.out"
 
 CORE_NAMESPACE_BEGIN
 

@@ -18,11 +18,11 @@
 
 #include "math/algo.h"
 #include "math/vector.h"
-#include "mve/mesh_info.h"
-#include "mve/mesh_tools.h"
+#include "core/mesh_info.h"
+#include "core/mesh_tools.h"
 
-MVE_NAMESPACE_BEGIN
-MVE_GEOM_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_GEOM_NAMESPACE_BEGIN
 
 /** for-each functor: homogenous matrix-vector multiplication. */
 template <typename T, int D>
@@ -43,18 +43,21 @@ struct foreach_hmatrix_mult
 /* ---------------------------------------------------------------- */
 
 void
-mesh_transform (mve::TriangleMesh::Ptr mesh, math::Matrix3f const& rot)
+mesh_transform (core::TriangleMesh::Ptr mesh, math::Matrix3f const& rot)
 {
     if (mesh == nullptr)
         throw std::invalid_argument("Null mesh given");
 
-    mve::TriangleMesh::VertexList& verts(mesh->get_vertices());
-    mve::TriangleMesh::NormalList& vnorm(mesh->get_vertex_normals());
-    mve::TriangleMesh::NormalList& fnorm(mesh->get_face_normals());
+    core::TriangleMesh::VertexList& verts(mesh->get_vertices());
+    core::TriangleMesh::NormalList& vnorm(mesh->get_vertex_normals());
+    core::TriangleMesh::NormalList& fnorm(mesh->get_face_normals());
 
     math::algo::foreach_matrix_mult<math::Matrix3f, math::Vec3f> func(rot);
+    // 对网格顶点坐标进行变换
     std::for_each(verts.begin(), verts.end(), func);
+    // 对面片法向量进行变换
     std::for_each(fnorm.begin(), fnorm.end(), func);
+    // 对顶点法向量进行变换
     std::for_each(vnorm.begin(), vnorm.end(), func);
 }
 
@@ -66,9 +69,12 @@ mesh_transform (TriangleMesh::Ptr mesh, math::Matrix4f const& trans)
     if (mesh == nullptr)
         throw std::invalid_argument("Null mesh given");
 
-    mve::TriangleMesh::VertexList& verts(mesh->get_vertices());
-    mve::TriangleMesh::NormalList& vnorm(mesh->get_vertex_normals());
-    mve::TriangleMesh::NormalList& fnorm(mesh->get_face_normals());
+    // 网格顶点
+    core::TriangleMesh::VertexList& verts(mesh->get_vertices());
+    // 顶点法向量
+    core::TriangleMesh::NormalList& vnorm(mesh->get_vertex_normals());
+    // 面片法向量
+    core::TriangleMesh::NormalList& fnorm(mesh->get_face_normals());
 
     foreach_hmatrix_mult<float, 4> vfunc(trans, 1.0f);
     foreach_hmatrix_mult<float, 4> nfunc(trans, 0.0f);
@@ -83,22 +89,22 @@ mesh_transform (TriangleMesh::Ptr mesh, math::Matrix4f const& trans)
 void
 mesh_merge (TriangleMesh::ConstPtr mesh1, TriangleMesh::Ptr mesh2)
 {
-    mve::TriangleMesh::VertexList const& verts1 = mesh1->get_vertices();
-    mve::TriangleMesh::VertexList& verts2 = mesh2->get_vertices();
-    mve::TriangleMesh::ColorList const& color1 = mesh1->get_vertex_colors();
-    mve::TriangleMesh::ColorList& color2 = mesh2->get_vertex_colors();
-    mve::TriangleMesh::ConfidenceList const& confs1 = mesh1->get_vertex_confidences();
-    mve::TriangleMesh::ConfidenceList& confs2 = mesh2->get_vertex_confidences();
-    mve::TriangleMesh::ValueList const& values1 = mesh1->get_vertex_values();
-    mve::TriangleMesh::ValueList& values2 = mesh2->get_vertex_values();
-    mve::TriangleMesh::NormalList const& vnorm1 = mesh1->get_vertex_normals();
-    mve::TriangleMesh::NormalList& vnorm2 = mesh2->get_vertex_normals();
-    mve::TriangleMesh::TexCoordList const& vtex1 = mesh1->get_vertex_texcoords();
-    mve::TriangleMesh::TexCoordList& vtex2 = mesh2->get_vertex_texcoords();
-    mve::TriangleMesh::NormalList const& fnorm1 = mesh1->get_face_normals();
-    mve::TriangleMesh::NormalList& fnorm2 = mesh2->get_face_normals();
-    mve::TriangleMesh::FaceList const& faces1 = mesh1->get_faces();
-    mve::TriangleMesh::FaceList& faces2 = mesh2->get_faces();
+    core::TriangleMesh::VertexList const& verts1 = mesh1->get_vertices();
+    core::TriangleMesh::VertexList& verts2 = mesh2->get_vertices();
+    core::TriangleMesh::ColorList const& color1 = mesh1->get_vertex_colors();
+    core::TriangleMesh::ColorList& color2 = mesh2->get_vertex_colors();
+    core::TriangleMesh::ConfidenceList const& confs1 = mesh1->get_vertex_confidences();
+    core::TriangleMesh::ConfidenceList& confs2 = mesh2->get_vertex_confidences();
+    core::TriangleMesh::ValueList const& values1 = mesh1->get_vertex_values();
+    core::TriangleMesh::ValueList& values2 = mesh2->get_vertex_values();
+    core::TriangleMesh::NormalList const& vnorm1 = mesh1->get_vertex_normals();
+    core::TriangleMesh::NormalList& vnorm2 = mesh2->get_vertex_normals();
+    core::TriangleMesh::TexCoordList const& vtex1 = mesh1->get_vertex_texcoords();
+    core::TriangleMesh::TexCoordList& vtex2 = mesh2->get_vertex_texcoords();
+    core::TriangleMesh::NormalList const& fnorm1 = mesh1->get_face_normals();
+    core::TriangleMesh::NormalList& fnorm2 = mesh2->get_face_normals();
+    core::TriangleMesh::FaceList const& faces1 = mesh1->get_faces();
+    core::TriangleMesh::FaceList& faces2 = mesh2->get_faces();
 
     verts2.reserve(verts1.size() + verts2.size());
     color2.reserve(color1.size() + color2.size());
@@ -284,5 +290,5 @@ mesh_delete_unreferenced (TriangleMesh::Ptr mesh)
     return num_deleted;
 }
 
-MVE_GEOM_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_GEOM_NAMESPACE_END
+CORE_NAMESPACE_END

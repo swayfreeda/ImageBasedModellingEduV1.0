@@ -26,6 +26,7 @@ CORE_NAMESPACE_BEGIN
 class MeshBase
 {
 public:
+    // shared pointer
     typedef std::shared_ptr<MeshBase> Ptr;
     typedef std::shared_ptr<MeshBase const> ConstPtr;
 
@@ -92,8 +93,11 @@ public:
     typedef std::shared_ptr<TriangleMesh> Ptr;
     typedef std::shared_ptr<TriangleMesh const> ConstPtr;
 
+    // 法向量
     typedef std::vector<math::Vec3f> NormalList;
+    // 纹理坐标
     typedef std::vector<math::Vec2f> TexCoordList;
+    // 面片
     typedef std::vector<VertexID> FaceList;
 
     typedef std::vector<bool> DeleteList;
@@ -171,11 +175,20 @@ public:
     std::size_t get_byte_size (void) const;
 
 protected:
+
+    // 顶点法向量
     NormalList vertex_normals;
+
+    // 顶点纹理坐标
     TexCoordList vertex_texcoords;
 
+    // 面片
     FaceList faces;
+
+    // 面片法向量
     NormalList face_normals;
+
+    // 面片颜色
     ColorList face_colors;
 
 protected:

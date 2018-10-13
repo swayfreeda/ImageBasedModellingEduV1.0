@@ -16,10 +16,10 @@
 
 #include "math/vector.h"
 #include "util/exception.h"
-#include "mve/mesh_io_off.h"
+#include "core/mesh_io_off.h"
 
-MVE_NAMESPACE_BEGIN
-MVE_GEOM_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_GEOM_NAMESPACE_BEGIN
 
 TriangleMesh::Ptr
 load_off_mesh (std::string const& filename)
@@ -200,5 +200,5 @@ save_off_mesh (TriangleMesh::ConstPtr mesh, std::string const& filename)
     out.close();
 }
 
-MVE_GEOM_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_GEOM_NAMESPACE_END
+CORE_NAMESPACE_END

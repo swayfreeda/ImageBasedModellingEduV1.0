@@ -10,15 +10,15 @@
 #ifndef MVE_DEPTHMAP_HEADER
 #define MVE_DEPTHMAP_HEADER
 
+#include "core/defines.h"
 #include "math/vector.h"
 #include "math/matrix.h"
-#include "mve/defines.h"
-#include "mve/camera.h"
-#include "mve/image.h"
-#include "mve/mesh.h"
+#include "core/camera.h"
+#include "core/image.h"
+#include "core/mesh.h"
 
-MVE_NAMESPACE_BEGIN
-MVE_IMAGE_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_IMAGE_NAMESPACE_BEGIN
 
 /**
  * Algorithm to clean small confident islands in the depth maps.
@@ -63,13 +63,13 @@ void
 depthmap_convert_conventions (typename Image<T>::Ptr dm,
     math::Matrix3f const& invproj, bool to_mve);
 
-MVE_IMAGE_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_IMAGE_NAMESPACE_END
+CORE_NAMESPACE_END
 
 /* ---------------------------------------------------------------- */
 
-MVE_NAMESPACE_BEGIN
-MVE_GEOM_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_GEOM_NAMESPACE_BEGIN
 
 /**
  * Function that calculates the pixel footprint (pixel width)
@@ -89,7 +89,7 @@ pixel_3dpos (std::size_t x, std::size_t y, float depth,
     math::Matrix3f const& invproj);
 
 /**
- * Algorithm to triangulate depth maps.
+ * \description * Algorithm to triangulate depth maps.
  *
  * A factor may be specified that guides depth discontinuity detection. A
  * depth discontinuity between pixels is assumed if depth difference is
@@ -100,25 +100,41 @@ pixel_3dpos (std::size_t x, std::size_t y, float depth,
  * If 'vids' is not null, image content is replaced with vertex indices for
  * each pixel that generated the vertex. Index MATH_MAX_UINT corresponds to
  * a pixel that did not generate a vertex.
+ * @param dm -- 深度图
+ * @param invproj -- 投影矩阵的逆矩阵
+ * @param dd_factor -- 不确定因子
+ * @param vids --可视图像
+ * @return
  */
 TriangleMesh::Ptr
 depthmap_triangulate (FloatImage::ConstPtr dm, math::Matrix3f const& invproj,
-    float dd_factor = 5.0f, mve::Image<unsigned int>* vids = nullptr);
+    float dd_factor = 5.0f, core::Image<unsigned int>* vids = nullptr);
 
-/**
- * A helper function that triangulates the given depth map with optional
- * color image (which generates additional per-vertex colors) in local
- * image coordinates.
- */
+
+ /**
+  * \description A helper function that triangulates the given depth map with optional
+  * color image (which generates additional per-vertex colors) in local
+  * image coordinates.
+  * @param dm
+  * @param ci
+  * @param invproj
+  * @param dd_factor
+  * @return
+  */
 TriangleMesh::Ptr
 depthmap_triangulate (FloatImage::ConstPtr dm, ByteImage::ConstPtr ci,
     math::Matrix3f const& invproj, float dd_factor = 5.0f);
 
-/**
- * A helper function that triangulates the given depth map with optional
- * color image (which generates additional per-vertex colors) and transforms
- * the mesh into the global coordinate system.
- */
+ /**
+  * \description A helper function that triangulates the given depth map with optional
+  * color image (which generates additional per-vertex colors) and transforms
+  * the mesh into the global coordinate system.
+  * @param dm -- 深度图像
+  * @param ci -- 彩色图像
+  * @param cam -- 相机参数
+  * @param dd_factor -- ??
+  * @return
+  */
 TriangleMesh::Ptr
 depthmap_triangulate (FloatImage::ConstPtr dm, ByteImage::ConstPtr ci,
     CameraInfo const& cam, float dd_factor = 5.0f);
@@ -149,13 +165,13 @@ depthmap_mesh_confidences (TriangleMesh::Ptr mesh, int iterations = 3);
 void
 depthmap_mesh_peeling (TriangleMesh::Ptr mesh, int iterations = 1);
 
-MVE_GEOM_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_GEOM_NAMESPACE_END
+CORE_NAMESPACE_END
 
 /* ------------------------- Implementation ----------------------- */
 
-MVE_NAMESPACE_BEGIN
-MVE_IMAGE_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_IMAGE_NAMESPACE_BEGIN
 
 template <typename T>
 inline void
@@ -178,7 +194,7 @@ depthmap_convert_conventions (typename Image<T>::Ptr dm,
         }
 }
 
-MVE_IMAGE_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_IMAGE_NAMESPACE_END
+CORE_NAMESPACE_END
 
 #endif /* MVE_DEPTHMAP_HEADER */

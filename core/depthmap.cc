@@ -14,12 +14,12 @@
 
 #include "math/defines.h"
 #include "math/matrix.h"
-#include "mve/mesh_info.h"
-#include "mve/depthmap.h"
-#include "mve/mesh_tools.h"
+#include "core/mesh_info.h"
+#include "core/depthmap.h"
+#include "core/mesh_tools.h"
 
-MVE_NAMESPACE_BEGIN
-MVE_IMAGE_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_IMAGE_NAMESPACE_BEGIN
 
 void
 depthmap_cleanup_grow (FloatImage::ConstPtr dm, FloatImage::Ptr ret,
@@ -127,14 +127,15 @@ depthmap_confidence_clean (FloatImage::Ptr dm, FloatImage::ConstPtr cm)
             dm->at(i, 0) = 0.0f;
 }
 
-MVE_IMAGE_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_IMAGE_NAMESPACE_END
+CORE_NAMESPACE_END
 
 /* ---------------------------------------------------------------- */
 
-MVE_NAMESPACE_BEGIN
-MVE_GEOM_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_GEOM_NAMESPACE_BEGIN
 
+// todo foot print 是什么意思??
 float
 pixel_footprint (std::size_t x, std::size_t y, float depth,
     math::Matrix3f const& invproj)
@@ -158,22 +159,20 @@ pixel_3dpos (std::size_t x, std::size_t y, float depth,
 /* ---------------------------------------------------------------- */
 
 void
-dm_make_triangle (TriangleMesh* mesh, mve::Image<unsigned int>& vidx,
+dm_make_triangle (TriangleMesh* mesh, core::Image<unsigned int>& vidx,
     FloatImage const* dm, math::Matrix3f const& invproj,
     std::size_t i, int* tverts)
 {
     int const width = vidx.width();
     //int const height = vidx.height();
-    mve::TriangleMesh::VertexList& verts(mesh->get_vertices());
-    mve::TriangleMesh::FaceList& faces(mesh->get_faces());
+    core::TriangleMesh::VertexList& verts(mesh->get_vertices());
+    core::TriangleMesh::FaceList& faces(mesh->get_faces());
 
-    for (int j = 0; j < 3; ++j)
-    {
+    for (int j = 0; j < 3; ++j) {
         int iidx = i + (tverts[j] % 2) + width * (tverts[j] / 2);
         int x = iidx % width;
         int y = iidx / width;
-        if (vidx.at(iidx) == MATH_MAX_UINT)
-        {
+        if (vidx.at(iidx) == MATH_MAX_UINT) {
             /* Add vertex for depth pixel. */
             vidx.at(iidx) = verts.size();
             float depth = dm->at(iidx, 0);
@@ -209,61 +208,81 @@ dm_is_depthdisc (float* widths, float* depths, float dd_factor, int i1, int i2)
 
 TriangleMesh::Ptr
 depthmap_triangulate (FloatImage::ConstPtr dm, math::Matrix3f const& invproj,
-    float dd_factor, mve::Image<unsigned int>* vids)
+    float dd_factor, core::Image<unsigned int>* vids)
 {
+    // 深度图不为空
     if (dm == nullptr)
         throw std::invalid_argument("Null depthmap given");
 
+    // 图像的宽和高
     int const width = dm->width();
     int const height = dm->height();
 
+    // 创建三角网格接结构体
     /* Prepare triangle mesh. */
     TriangleMesh::Ptr mesh(TriangleMesh::create());
 
     /* Generate image that maps image pixels to vertex IDs. */
-    mve::Image<unsigned int> vidx(width, height, 1);
+    // 创建映射图，将图像像素映射到三维点的索引
+    core::Image<unsigned int> vidx(width, height, 1);
     vidx.fill(MATH_MAX_UINT);
 
+    // 在深度图中遍历2x2 blocks，并且创建三角面片
     /* Iterate over 2x2-blocks in the depthmap and create triangles. */
     int i = 0;
-    for (int y = 0; y < height - 1; ++y, ++i)
-    {
-        for (int x = 0; x < width - 1; ++x, ++i)
-        {
+    for (int y = 0; y < height - 1; ++y, ++i) {
+        for (int x = 0; x < width - 1; ++x, ++i) {
+
             /* Cache the four depth values. */
-            float depths[4] = { dm->at(i, 0), dm->at(i + 1, 0),
-                dm->at(i + width, 0), dm->at(i + width + 1, 0) };
+            /*
+             * 0, 1
+             * 2, 3
+             */
+            float depths[4] = { dm->at(i, 0),         dm->at(i + 1, 0),
+                                dm->at(i + width, 0), dm->at(i + width + 1, 0)
+                              };
 
             /* Create a mask representation of the available depth values. */
+            /* 创建mask记录深度有效的像素个数
+             * mask=0000, 0001, 0010, 0011, 0100, 0101, 0110, 0111, 1000, 1001,
+             *      1010, 1011, 1100, 1101, 1110, 1111
+             */
             int mask = 0;
             int pixels = 0;
-            for (int j = 0; j < 4; ++j)
-                if (depths[j] > 0.0f)
-                {
+            for (int j = 0; j < 4; ++j){
+                if (depths[j] > 0.0f) {
                     mask |= 1 << j;
                     pixels += 1;
                 }
+            }
 
+            // 至少保证3个深度值是可靠的
             /* At least three valid depth values are required. */
             if (pixels < 3)
                 continue;
 
+
             /* Possible triangles, vertex indices relative to 2x2 block. */
+            /* 可能出现的三角面片对,4个点有2个面片
+             */
             int tris[4][3] = {
                 { 0, 2, 1 }, { 0, 3, 1 }, { 0, 2, 3 }, { 1, 2, 3 }
             };
 
             /* Decide which triangles to issue. */
+            /* 决定用哪对面片
+             */
             int tri[2] = { 0, 0 };
 
-            switch (mask)
-            {
-                case 7: tri[0] = 1; break;
-                case 11: tri[0] = 2; break;
-                case 13: tri[0] = 3; break;
-                case 14: tri[0] = 4; break;
-                case 15:
+            switch (mask) {
+
+                case 7: tri[0] = 1; break;  // 0111- 0，1，2
+                case 11: tri[0] = 2; break; // 1011- 0，1，3
+                case 13: tri[0] = 3; break; // 1101- 0，2，3
+                case 14: tri[0] = 4; break; // 1110- 1，2，3
+                case 15:                    // 1111- 0，1，2，3
                 {
+                    // 空圆特性
                     /* Choose the triangulation with smaller diagonal. */
                     float ddiff1 = std::abs(depths[0] - depths[3]);
                     float ddiff2 = std::abs(depths[1] - depths[2]);
@@ -277,21 +296,18 @@ depthmap_triangulate (FloatImage::ConstPtr dm, math::Matrix3f const& invproj,
             }
 
             /* Omit depth discontinuity detection if dd_factor is zero. */
-            if (dd_factor > 0.0f)
-            {
+            if (dd_factor > 0.0f) {
                 /* Cache pixel footprints. */
                 float widths[4];
-                for (int j = 0; j < 4; ++j)
-                {
+                for (int j = 0; j < 4; ++j) {
                     if (depths[j] == 0.0f)
                         continue;
-                    widths[j] = pixel_footprint(x + (j % 2), y + (j / 2),
-                        depths[j], invproj);// w, h, focal_len);
+                    widths[j] = pixel_footprint(x + (j % 2), y + (j / 2), depths[j], invproj);// w, h, focal_len);
                 }
 
+                // 检查深度不一致性，相邻像素的深度差值不要超过像素宽度(三维空间中）的dd_factor倍
                 /* Check for depth discontinuities. */
-                for (int j = 0; j < 2 && tri[j] != 0; ++j)
-                {
+                for (int j = 0; j < 2 && tri[j] != 0; ++j) {
                     int* tv = tris[tri[j] - 1];
                     #define DM_DD_ARGS widths, depths, dd_factor
                     if (dm_is_depthdisc(DM_DD_ARGS, tv[0], tv[1])) tri[j] = 0;
@@ -301,8 +317,7 @@ depthmap_triangulate (FloatImage::ConstPtr dm, math::Matrix3f const& invproj,
             }
 
             /* Build triangles. */
-            for (int j = 0; j < 2; ++j)
-            {
+            for (int j = 0; j < 2; ++j) {
                 if (tri[j] == 0) continue;
                 #define DM_MAKE_TRI_ARGS mesh.get(), vidx, dm.get(), invproj, i
                 dm_make_triangle(DM_MAKE_TRI_ARGS, tris[tri[j] - 1]);
@@ -322,42 +337,48 @@ TriangleMesh::Ptr
 depthmap_triangulate (FloatImage::ConstPtr dm, ByteImage::ConstPtr ci,
     math::Matrix3f const& invproj, float dd_factor)
 {
+    // 深度图像不为空
     if (dm == nullptr)
         throw std::invalid_argument("Null depthmap given");
 
+    // 图像的宽和高
     int const width = dm->width();
     int const height = dm->height();
 
+    // 彩色图像不为空，且和深度图像宽和高一致
     if (ci != nullptr && (ci->width() != width || ci->height() != height))
         throw std::invalid_argument("Color image dimension mismatch");
 
     /* Triangulate depth map. */
-    mve::Image<unsigned int> vids;
-    mve::TriangleMesh::Ptr mesh;
-    mesh = mve::geom::depthmap_triangulate(dm, invproj, dd_factor, &vids);
+    // 对深度图进行三角化
+    core::Image<unsigned int> vids;
+    core::TriangleMesh::Ptr mesh;
+    mesh = core::geom::depthmap_triangulate(dm, invproj, dd_factor, &vids);
 
+    // 获取颜色
     if (ci == nullptr)
         return mesh;
 
+    /*计算顶点的颜色*/
     /* Use vertex index mapping to color the mesh. */
-    mve::TriangleMesh::ColorList& colors(mesh->get_vertex_colors());
-    mve::TriangleMesh::VertexList const& verts(mesh->get_vertices());
+    core::TriangleMesh::ColorList& colors(mesh->get_vertex_colors());
+    core::TriangleMesh::VertexList const& verts(mesh->get_vertices());
     colors.resize(verts.size());
 
+    // 像素个数
     int num_pixel = vids.get_pixel_amount();
     for (int i = 0; i < num_pixel; ++i)
     {
+        // 像素没有对应的顶点
         if (vids[i] == MATH_MAX_UINT)
             continue;
 
         math::Vec4f color(ci->at(i, 0), 0.0f, 0.0f, 255.0f);
-        if (ci->channels() >= 3)
-        {
+        if (ci->channels() >= 3) {
             color[1] = ci->at(i, 1);
             color[2] = ci->at(i, 2);
         }
-        else
-        {
+        else {
             color[1] = color[2] = color[0];
         }
         colors[vids[i]] = color / 255.0f;
@@ -372,22 +393,29 @@ TriangleMesh::Ptr
 depthmap_triangulate (FloatImage::ConstPtr dm, ByteImage::ConstPtr ci,
     CameraInfo const& cam, float dd_factor)
 {
+    // 确保深度图不为空
     if (dm == nullptr)
         throw std::invalid_argument("Null depthmap given");
+
+    // 确保相机参数已经恢复
     if (cam.flen == 0.0f)
         throw std::invalid_argument("Invalid camera given");
 
     /* Triangulate depth map. */
+    // 计算投影矩阵的逆矩阵
     math::Matrix3f invproj;
     cam.fill_inverse_calibration(*invproj, dm->width(), dm->height());
-    mve::TriangleMesh::Ptr mesh;
-    mesh = mve::geom::depthmap_triangulate(dm, ci, invproj, dd_factor);
+
+    // 对深度图进行三角化，注意此时的mesh顶点坐标位于相机坐标系中
+    core::TriangleMesh::Ptr mesh;
+    mesh = core::geom::depthmap_triangulate(dm, ci, invproj, dd_factor);
 
     /* Transform mesh to world coordinates. */
+    // 将网格从相机坐标系转化到世界坐标系中
     math::Matrix4f ctw;
     cam.fill_cam_to_world(*ctw);
-    mve::geom::mesh_transform(mesh, ctw);
-    mesh->recalc_normals(false, true); // Remove this?
+    core::geom::mesh_transform(mesh, ctw);
+    //mesh->recalc_normals(false, true); // Remove this?
 
     return mesh;
 }
@@ -508,8 +536,7 @@ depthmap_mesh_confidences (TriangleMesh::Ptr mesh, int iterations)
     std::vector<std::size_t> vidx;
     MeshInfo mesh_info(mesh);
 
-    for (std::size_t i = 0; i < mesh_info.size(); ++i)
-    {
+    for (std::size_t i = 0; i < mesh_info.size(); ++i) {
         if (mesh_info[i].vclass == MeshInfo::VERTEX_CLASS_BORDER)
             vidx.push_back(i);
     }
@@ -578,5 +605,5 @@ depthmap_mesh_peeling (TriangleMesh::Ptr mesh, int iterations)
     math::algo::vector_clean(delete_list, &faces);
 }
 
-MVE_GEOM_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_GEOM_NAMESPACE_END
+CORE_NAMESPACE_END

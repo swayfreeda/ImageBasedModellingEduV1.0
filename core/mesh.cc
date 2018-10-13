@@ -11,7 +11,7 @@
 
 #include "math/defines.h"
 #include "math/functions.h"
-#include "mve/mesh.h"
+#include "core/mesh.h"
 
 /*
  * Whether to use AWPN (angle-weighted pseudo normals)
@@ -19,7 +19,7 @@
  */
 #define MESH_AWPN_NORMALS 1
 
-MVE_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
 
 void
 TriangleMesh::recalc_normals (bool face, bool vertex)
@@ -27,14 +27,12 @@ TriangleMesh::recalc_normals (bool face, bool vertex)
     if (!face && !vertex)
         return;
 
-    if (face)
-    {
+    if (face) {
         this->face_normals.clear();
         this->face_normals.reserve(this->faces.size() / 3);
     }
 
-    if (vertex)
-    {
+    if (vertex) {
         this->vertex_normals.clear();
         this->vertex_normals.resize(this->vertices.size(), math::Vec3f(0.0f));
     }
@@ -42,8 +40,7 @@ TriangleMesh::recalc_normals (bool face, bool vertex)
     std::size_t zlfn = 0;
     std::size_t zlvn = 0;
 
-    for (std::size_t i = 0; i < this->faces.size(); i += 3)
-    {
+    for (std::size_t i = 0; i < this->faces.size(); i += 3) {
         /* Face vertex indices. */
         std::size_t ia = this->faces[i + 0];
         std::size_t ib = this->faces[i + 1];
@@ -282,4 +279,4 @@ TriangleMesh::get_byte_size (void) const
     return s_verts + s_faces + s_vnorm + s_fnorm + s_color;
 }
 
-MVE_NAMESPACE_END
+CORE_NAMESPACE_END

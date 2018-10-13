@@ -144,7 +144,7 @@ Scene::init_views (void)
 
     /* Iterate over all mve files and create view. */
     std::string views_path = util::fs::join_path(this->basedir,
-        MVE_SCENE_VIEWS_DIR);
+        CORE_SCENE_VIEWS_DIR);
     util::fs::Directory views_dir;
     try
     {
@@ -212,7 +212,7 @@ Scene::get_bundle (void)
     if (this->bundle == nullptr)
     {
         std::string filename = util::fs::join_path(this->basedir,
-            MVE_SCENE_BUNDLE_FILE);
+            CORE_SCENE_BUNDLE_FILE);
         this->bundle = load_mve_bundle(filename);
         this->bundle_dirty = false;
     }

@@ -31,6 +31,7 @@ set(HEADERS
         bundle.h
         bundle_io.h
         camera.h
+        depthmap.h
         image.h
         image_base.h
         image_color.h
@@ -40,17 +41,37 @@ set(HEADERS
         image_tools.h
         scene.h
         view.h
+        mesh.h
+        mesh_info.h
+        mesh_tools.h
+        mesh_io_ply.h
+        mesh_io_obj.h
+        mesh_io_off.h
+        mesh_io_npts.h
+        mesh_io_smf.h
+        mesh_io_pbrt.h
         )
 
 set(SOURCE_FILES
         bundle.cc
         bundle_io.cc
         camera.cc
+        depthmap.cc
         image_exif.cc
         image_io.cc
         image_tools.cc
         scene.cc
         view.cc
+        mesh.cc
+        mesh_info.cc
+        mesh_tools.cc
+        mesh_io.cc
+        mesh_io_ply.cc
+        mesh_io_obj.cc
+        mesh_io_off.cc
+        mesh_io_npts.cc
+        mesh_io_smf.cc
+        mesh_io_pbrt.cc
         )
 add_library(core ${HEADERS} ${SOURCE_FILES})
 target_link_libraries(core util ${PNG_LIBRARIES} ${JPEG_LIBRARIES} ${TIFF_LIBRARIES})

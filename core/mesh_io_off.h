@@ -12,11 +12,11 @@
 
 #include <string>
 
-#include "mve/defines.h"
-#include "mve/mesh.h"
+#include "core/defines.h"
+#include "core/mesh.h"
 
-MVE_NAMESPACE_BEGIN
-MVE_GEOM_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_GEOM_NAMESPACE_BEGIN
 
 /** Loads a triangle mesh from an OFF model file. */
 TriangleMesh::Ptr
@@ -26,7 +26,7 @@ load_off_mesh (std::string const& filename);
 void
 save_off_mesh (TriangleMesh::ConstPtr mesh, std::string const& filename);
 
-MVE_GEOM_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_GEOM_NAMESPACE_END
+CORE_NAMESPACE_END
 
 #endif /* MVE_OFF_FILE_HEADER */

@@ -10,17 +10,17 @@
 #include <stdexcept>
 
 #include "util/strings.h"
-#include "mve/mesh.h"
-#include "mve/mesh_io.h"
-#include "mve/mesh_io_ply.h"
-#include "mve/mesh_io_off.h"
-#include "mve/mesh_io_npts.h"
-#include "mve/mesh_io_pbrt.h"
-#include "mve/mesh_io_smf.h"
-#include "mve/mesh_io_obj.h"
+#include "core/mesh.h"
+#include "core/mesh_io.h"
+#include "core/mesh_io_ply.h"
+#include "core/mesh_io_off.h"
+#include "core/mesh_io_npts.h"
+#include "core/mesh_io_pbrt.h"
+#include "core/mesh_io_smf.h"
+#include "core/mesh_io_obj.h"
 
-MVE_NAMESPACE_BEGIN
-MVE_GEOM_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_GEOM_NAMESPACE_BEGIN
 
 TriangleMesh::Ptr
 load_mesh (std::string const& filename)
@@ -64,5 +64,5 @@ save_mesh (TriangleMesh::ConstPtr mesh, std::string const& filename)
         throw std::runtime_error("Extension not recognized");
 }
 
-MVE_GEOM_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_GEOM_NAMESPACE_END
+CORE_NAMESPACE_END

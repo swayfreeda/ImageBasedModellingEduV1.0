@@ -14,10 +14,10 @@
 #include <cstring>
 
 #include "util/exception.h"
-#include "mve/mesh_io_smf.h"
+#include "core/mesh_io_smf.h"
 
-MVE_NAMESPACE_BEGIN
-MVE_GEOM_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_GEOM_NAMESPACE_BEGIN
 
 TriangleMesh::Ptr
 load_smf_mesh (std::string const& filename)
@@ -74,7 +74,7 @@ load_smf_mesh (std::string const& filename)
 }
 
 void
-save_smf_mesh (mve::TriangleMesh::ConstPtr mesh, std::string const& filename)
+save_smf_mesh (core::TriangleMesh::ConstPtr mesh, std::string const& filename)
 {
     if (mesh == nullptr)
         throw std::invalid_argument("Null mesh given");
@@ -108,5 +108,5 @@ save_smf_mesh (mve::TriangleMesh::ConstPtr mesh, std::string const& filename)
     out.close();
 }
 
-MVE_GEOM_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_GEOM_NAMESPACE_END
+CORE_NAMESPACE_END

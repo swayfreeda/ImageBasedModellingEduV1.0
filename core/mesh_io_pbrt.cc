@@ -14,10 +14,10 @@
 #include <cstring>
 
 #include "util/exception.h"
-#include "mve/mesh_io_pbrt.h"
+#include "core/mesh_io_pbrt.h"
 
-MVE_NAMESPACE_BEGIN
-MVE_GEOM_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_GEOM_NAMESPACE_BEGIN
 
 void
 save_pbrt_mesh (TriangleMesh::ConstPtr mesh, std::string const& filename)
@@ -27,9 +27,9 @@ save_pbrt_mesh (TriangleMesh::ConstPtr mesh, std::string const& filename)
     if (filename.empty())
         throw std::invalid_argument("No filename given");
 
-    mve::TriangleMesh::VertexList const& verts(mesh->get_vertices());
-    mve::TriangleMesh::NormalList const& vnormals(mesh->get_vertex_normals());
-    mve::TriangleMesh::FaceList const& faces(mesh->get_faces());
+    core::TriangleMesh::VertexList const& verts(mesh->get_vertices());
+    core::TriangleMesh::NormalList const& vnormals(mesh->get_vertex_normals());
+    core::TriangleMesh::FaceList const& faces(mesh->get_faces());
 
     /* Open output file. */
     std::ofstream out(filename.c_str(), std::ios::binary);
@@ -83,5 +83,5 @@ save_pbrt_mesh (TriangleMesh::ConstPtr mesh, std::string const& filename)
 }
 
 
-MVE_GEOM_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_GEOM_NAMESPACE_END
+CORE_NAMESPACE_END

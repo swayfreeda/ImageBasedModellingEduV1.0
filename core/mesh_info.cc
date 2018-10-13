@@ -11,9 +11,9 @@
 #include <list>
 #include <set>
 
-#include "mve/mesh_info.h"
+#include "core/mesh_info.h"
 
-MVE_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
 
 void
 MeshInfo::initialize (TriangleMesh::ConstPtr mesh)
@@ -60,12 +60,10 @@ MeshInfo::update_vertex (TriangleMesh const& mesh, std::size_t vertex_id)
 
     /* Build new, temporary adjacent faces representation for ordering. */
     AdjacentFaceList adj_temp;
-    for (std::size_t i = 0; i < vinfo.faces.size(); ++i)
-    {
+    for (std::size_t i = 0; i < vinfo.faces.size(); ++i) {
         std::size_t face_off = vinfo.faces[i] * 3;
         for (std::size_t j = 0; j < 3; ++j)
-            if (faces[face_off + j] == vertex_id)
-            {
+            if (faces[face_off + j] == vertex_id) {
                 adj_temp.push_back(AdjacentFace());
                 adj_temp.back().face_id = vinfo.faces[i];
                 adj_temp.back().first = faces[face_off + (j + 1) % 3];
@@ -180,4 +178,4 @@ MeshInfo::get_faces_for_edge (std::size_t v1, std::size_t v2,
             adjacent_faces->push_back(faces1[i]);
 }
 
-MVE_NAMESPACE_END
+CORE_NAMESPACE_END

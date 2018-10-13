@@ -14,10 +14,10 @@
 #include <vector>
 #include <memory>
 
-#include "mve/defines.h"
-#include "mve/mesh.h"
+#include "core/defines.h"
+#include "core/mesh.h"
 
-MVE_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
 
 class MeshInfo
 {
@@ -164,6 +164,6 @@ MeshInfo::VertexInfo::replace_adjacent_vertex (std::size_t old_id,
     std::replace(this->verts.begin(), this->verts.end(), old_id, new_id);
 }
 
-MVE_NAMESPACE_END
+CORE_NAMESPACE_END
 
 #endif /* MVE_VERTEX_INFO_HEADER */

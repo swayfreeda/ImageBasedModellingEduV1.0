@@ -12,20 +12,20 @@
 
 #include <string>
 
-#include "mve/mesh.h"
-#include "mve/defines.h"
+#include "core/mesh.h"
+#include "core/defines.h"
 
-MVE_NAMESPACE_BEGIN
-MVE_GEOM_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_GEOM_NAMESPACE_BEGIN
 
 struct ObjModelPart
 {
-    mve::TriangleMesh::Ptr mesh;
+    core::TriangleMesh::Ptr mesh;
     std::string texture_filename;
 };
 
 /** Loads a triangle mesh from an OBJ model file. */
-mve::TriangleMesh::Ptr
+core::TriangleMesh::Ptr
 load_obj_mesh (std::string const& filename);
 
 /** Loads all groups from an OBJ model file. */
@@ -37,7 +37,7 @@ load_obj_mesh (std::string const& filename,
 void
 save_obj_mesh (TriangleMesh::ConstPtr mesh, std::string const& filename);
 
-MVE_GEOM_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_GEOM_NAMESPACE_END
+CORE_NAMESPACE_END
 
 #endif /* MVE_MESH_IO_OBJ_HEADER */

@@ -14,14 +14,14 @@
 #include <string>
 
 #include "util/system.h"
-#include "mve/defines.h"
-#include "mve/image.h"
-#include "mve/camera.h"
-#include "mve/view.h"
-#include "mve/mesh.h"
+#include "core/defines.h"
+#include "core/image.h"
+#include "core/camera.h"
+#include "core/view.h"
+#include "core/mesh.h"
 
-MVE_NAMESPACE_BEGIN
-MVE_GEOM_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_GEOM_NAMESPACE_BEGIN
 
 /**
  * Loads a triangle mesh from a PLY model file.
@@ -166,7 +166,7 @@ template <typename T>
 T
 ply_read_value (std::istream& input, PLYFormat format);
 
-MVE_GEOM_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_GEOM_NAMESPACE_END
+CORE_NAMESPACE_END
 
 #endif /* MVE_PLY_FILE_HEADER */

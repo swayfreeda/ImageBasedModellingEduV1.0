@@ -12,11 +12,11 @@
 
 #include <string>
 
-#include "mve/defines.h"
-#include "mve/mesh.h"
+#include "core/defines.h"
+#include "core/mesh.h"
 
-MVE_NAMESPACE_BEGIN
-MVE_GEOM_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_GEOM_NAMESPACE_BEGIN
 
 /**
  * Simple importer for Kazhdan's .npts ASCII and binary files.
@@ -31,7 +31,7 @@ void
 save_npts_mesh (TriangleMesh::ConstPtr mesh,
     std::string const& filename, bool format_binary = false);
 
-MVE_GEOM_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_GEOM_NAMESPACE_END
+CORE_NAMESPACE_END
 
 #endif /* MVE_MESH_IO_NPTS_HEADER */

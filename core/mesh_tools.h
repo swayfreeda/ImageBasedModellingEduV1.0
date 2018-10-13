@@ -12,11 +12,11 @@
 
 #include "math/vector.h"
 #include "math/matrix.h"
-#include "mve/defines.h"
-#include "mve/mesh.h"
+#include "core/defines.h"
+#include "core/mesh.h"
 
-MVE_NAMESPACE_BEGIN
-MVE_GEOM_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_GEOM_NAMESPACE_BEGIN
 
 /**
  * Transforms the vertices and normals of the mesh using the
@@ -80,7 +80,7 @@ mesh_find_aabb (TriangleMesh::ConstPtr mesh,
 std::size_t
 mesh_delete_unreferenced (TriangleMesh::Ptr mesh);
 
-MVE_GEOM_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_GEOM_NAMESPACE_END
+CORE_NAMESPACE_END
 
 #endif /* MVE_MESH_TOOLS_HEADER */
