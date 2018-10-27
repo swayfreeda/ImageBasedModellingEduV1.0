@@ -70,6 +70,7 @@ public:
         Node* first_node (void);
         // point to the first leaf
         Node* first_leaf (void);
+
         // point to next node
         Node* next_node (void);
 
@@ -77,6 +78,7 @@ public:
 
         // point to next branch
         Node* next_branch (void);
+
         // point to next leaf
         Node* next_leaf (void);
         // descend
