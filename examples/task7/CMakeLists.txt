@@ -8,12 +8,10 @@ include_directories(../../3rdParty/eigen)
 #set(TBB_INCLUDE_DIRS "/usr/local/Cellar/tbb/2019_U1/include" CACHE PATH "Path to where the TBB include files (tbb/) reside")
 #set(TBB_LIBRARY "/usr/local/Cellar/tbb/2019_U1/lib" CACHE PATH "Path to where the TBB library files (libtbb.so etc.) reside")
 #list(APPEND CMAKE_MODULE_PATH "../../cmake")
-find_package(TBB COMPONENTS tbbmalloc tbbmalloc_proxy tbb_preview)
+###find_package(TBB COMPONENTS tbbmalloc tbbmalloc_proxy tbb_preview)
 
 
-find_package(OpenGL REQUIRED)
-
-find_package(GLFW REQUIRED glfw3)
+####find_package(OpenGL REQUIRED)
 
 set(MESH_CLEAN_SOURCES
         class7_meshclean.cc)
@@ -26,4 +24,4 @@ set(TEXTURING_SOURCES
         arguments.cpp
         class7_texrecon.cpp)
 add_executable(task7_texturing ${TEXTURING_SOURCES})
-target_link_libraries(task7_texturing mvs util core texturing tbb)
+target_link_libraries(task7_texturing mvs util core texturing coldet mrf gco)

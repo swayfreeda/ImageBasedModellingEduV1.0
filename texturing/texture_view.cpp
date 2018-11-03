@@ -15,8 +15,6 @@
 
 #include "texture_view.h"
 
-TEX_NAMESPACE_BEGIN
-
 TextureView::TextureView(std::size_t id, core::CameraInfo const & camera,
     std::string const & image_file)
     : id(id), image_file(image_file) {
@@ -30,23 +28,17 @@ TextureView::TextureView(std::size_t id, core::CameraInfo const & camera,
         std::exit(EXIT_FAILURE);
     }
 
-    // width and height of camera
     width = header.width;
     height = header.height;
 
-    //projection matrix of the camera
     camera.fill_calibration(*projection, width, height);
-
-    // position of the camera
     camera.fill_camera_pos(*pos);
-
-    // viewing dir of the camera
     camera.fill_viewing_direction(*viewdir);
-
-    // extrinsic matrix
     camera.fill_world_to_cam(*world_to_cam);
 }
 
+
+// if piexl values in 3 channels are all 0, label the pixel as invalid
 void
 TextureView::generate_validity_mask(void) {
     assert(image != NULL);
@@ -110,11 +102,12 @@ TextureView::load_image(void) {
 void
 TextureView::generate_gradient_magnitude(void) {
     assert(image != NULL);
-    // convert color image to gray one
     core::ByteImage::Ptr bw = core::image::desaturate<std::uint8_t>(image, core::image::DESATURATE_LUMINANCE);
     gradient_magnitude = core::image::sobel_edge<std::uint8_t>(bw);
 }
 
+
+// borders are labelled as invalid
 void
 TextureView::erode_validity_mask(void) {
     std::vector<bool> eroded_validity_mask(validity_mask);
@@ -140,12 +133,20 @@ TextureView::erode_validity_mask(void) {
     validity_mask.swap(eroded_validity_mask);
 }
 
+// 1.0 compute the area of the projected triangle
+// 2.0 obtain samples in the projected triangle
+// 3.0 compute the mean colors or mean GMI of all the samples
+// 4.0 if QUALITY MODE is GMI : return mean_gmi*area
+//     if QUALITY MODE is AREA: return area
 void
-TextureView::get_face_info(math::Vec3f const & v1, math::Vec3f const & v2,
-    math::Vec3f const & v3, FaceProjectionInfo * face_info, Settings const & settings) const {
+TextureView::get_face_info(math::Vec3f const & v1,
+                           math::Vec3f const & v2,
+                           math::Vec3f const & v3,
+                           ProjectedFaceInfo * face_info,
+                           Settings const & settings) const {
 
     assert(image != NULL);
-    assert(settings.data_term != DATA_TERM_GMI || gradient_magnitude != NULL);
+    assert(settings.data_term != GMI || gradient_magnitude != NULL);
 
     math::Vec2f p1 = get_pixel_coords(v1);
     math::Vec2f p2 = get_pixel_coords(v2);
@@ -153,10 +154,9 @@ TextureView::get_face_info(math::Vec3f const & v1, math::Vec3f const & v2,
 
     assert(valid_pixel(p1) && valid_pixel(p2) && valid_pixel(p3));
 
-    // calculate the area of the triangle
+    // compute the area of the triangle
     Tri tri(p1, p2, p3);
     float area = tri.get_area();
-
     if (area < std::numeric_limits<float>::epsilon()) {
         face_info->quality = 0.0f;
         return;
@@ -166,7 +166,7 @@ TextureView::get_face_info(math::Vec3f const & v1, math::Vec3f const & v2,
     math::Vec3d colors(0.0);
     double gmi = 0.0;
 
-    bool sampling_necessary = settings.data_term != DATA_TERM_AREA || settings.outlier_removal != OUTLIER_REMOVAL_NONE;
+    bool sampling_necessary = settings.data_term != AREA || settings.outlier_removal != NONE;
 
     if (sampling_necessary && area > 0.5f) {
         /* Sort pixels in ascending order of y */
@@ -214,16 +214,14 @@ TextureView::get_face_info(math::Vec3f const & v1, math::Vec3f const & v2,
                 const float cy = static_cast<float>(y) + 0.5f;
                 if (!fast_sampling_possible && !tri.inside(cx, cy)) continue;
 
-                // get colors of each sample
-                if (settings.outlier_removal != OUTLIER_REMOVAL_NONE) {
+                if (settings.outlier_removal != NONE) {
                     for (std::size_t i = 0; i < 3; i++){
                          color[i] = static_cast<double>(image->at(x, y, i)) / 255.0;
                     }
                     colors += color;
                 }
 
-                // gradient of each sample
-                if (settings.data_term == DATA_TERM_GMI) {
+                if (settings.data_term == GMI) {
                     gmi += static_cast<double>(gradient_magnitude->at(x, y, 0)) / 255.0;
                 }
                 ++num_samples;
@@ -231,8 +229,7 @@ TextureView::get_face_info(math::Vec3f const & v1, math::Vec3f const & v2,
         }
     }
 
-    // mean gradient weighted by the area of triangle
-    if (settings.data_term == DATA_TERM_GMI) {
+    if (settings.data_term == GMI) {
         if (num_samples > 0) {
             gmi = (gmi / num_samples) * area;
         } else {
@@ -243,8 +240,7 @@ TextureView::get_face_info(math::Vec3f const & v1, math::Vec3f const & v2,
         }
     }
 
-    // mean color of the triangle
-    if (settings.outlier_removal != OUTLIER_REMOVAL_NONE) {
+    if (settings.outlier_removal != NONE) {
         if (num_samples > 0) {
             face_info->mean_color = colors / num_samples;
         } else {
@@ -259,8 +255,8 @@ TextureView::get_face_info(math::Vec3f const & v1, math::Vec3f const & v2,
     }
 
     switch (settings.data_term) {
-        case DATA_TERM_AREA: face_info->quality = area; break;
-        case DATA_TERM_GMI:  face_info->quality = gmi; break;
+        case AREA: face_info->quality = area; break;
+        case GMI:  face_info->quality = gmi; break;
     }
 }
 
@@ -326,5 +322,3 @@ TextureView::export_validity_mask(std::string const & filename) const {
     }
     core::image::save_png_file(img, filename);
 }
-
-TEX_NAMESPACE_END

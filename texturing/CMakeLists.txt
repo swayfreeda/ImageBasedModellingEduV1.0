@@ -3,9 +3,8 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "-fPIC")
 
 include_directories(..)
-include_directories(../3rdParty/rayint/libs)
-include_directories(../3rdParty/mapmap/mapmap)
-include_directories(../3rdParty/mapmap)
+include_directories(../3rdParty/mrf)
+include_directories(../3rdParty/coldet/src)
 
 set(HEADERS
         defines.h

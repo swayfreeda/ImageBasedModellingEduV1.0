@@ -14,16 +14,19 @@
 TEX_NAMESPACE_BEGIN
 
 void
-find_seam_edges(UniGraph const & graph, core::TriangleMesh::ConstPtr mesh,
-    std::vector<MeshEdge> * seam_edges) {
-    core::TriangleMesh::FaceList const & faces = mesh->get_faces();
+find_seam_edges(UniGraph const & graph,
+                core::TriangleMesh::ConstPtr mesh,
+                std::vector<MeshEdge> * seam_edges) {
 
+    core::TriangleMesh::FaceList const & faces = mesh->get_faces();
     seam_edges->clear();
 
     // Is it possible that a single edge is part of more than three faces whichs' label is non zero???
-
     for (std::size_t node = 0; node < graph.num_nodes(); ++node) {
+
+        // all the adjacent nodes
         std::vector<std::size_t> const & adj_nodes = graph.get_adj_nodes(node);
+
         for (std::size_t adj_node : adj_nodes) {
             /* Add each edge only once. */
             if (node > adj_node) continue;
@@ -61,17 +64,19 @@ find_seam_edges(UniGraph const & graph, core::TriangleMesh::ConstPtr mesh,
 void
 find_mesh_edge_projections(
     std::vector<std::vector<VertexProjectionInfo> > const & vertex_projection_infos,
-    MeshEdge mesh_edge, std::vector<EdgeProjectionInfo> * edge_projection_infos) {
+    MeshEdge mesh_edge, std::vector<ProjectedEdgeInfo> * projected_edge_infos) {
+
     std::vector<VertexProjectionInfo> const & v1_projection_infos = vertex_projection_infos[mesh_edge.v1];
     std::vector<VertexProjectionInfo> const & v2_projection_infos = vertex_projection_infos[mesh_edge.v2];
 
     /* Use a set to eliminate duplicates which may occur if the mesh is degenerated. */
-    std::set<EdgeProjectionInfo> edge_projection_infos_set;
+    std::set<ProjectedEdgeInfo> projected_edge_infos_set;
 
     for (VertexProjectionInfo v1_projection_info : v1_projection_infos) {
         for (VertexProjectionInfo v2_projection_info : v2_projection_infos) {
             if (v1_projection_info.texture_patch_id != v2_projection_info.texture_patch_id) continue;
 
+            //// any use????
             for (std::size_t face_id1 : v1_projection_info.faces) {
                 for (std::size_t face_id2 : v2_projection_info.faces) {
                     if(face_id1 != face_id2) continue;
@@ -80,14 +85,14 @@ find_mesh_edge_projections(
                     math::Vec2f p1 = v1_projection_info.projection;
                     math::Vec2f p2 = v2_projection_info.projection;
 
-                    EdgeProjectionInfo edge_projection_info = {texture_patch_id, p1, p2};
-                    edge_projection_infos_set.insert(edge_projection_info);
+                    ProjectedEdgeInfo projected_edge_info = {texture_patch_id, p1, p2};
+                    projected_edge_infos_set.insert(projected_edge_info);
                 }
             }
         }
     }
 
-    edge_projection_infos->insert(edge_projection_infos->end(), edge_projection_infos_set.begin(), edge_projection_infos_set.end());
+    projected_edge_infos->insert(projected_edge_infos->end(), projected_edge_infos_set.begin(), projected_edge_infos_set.end());
 }
 
 TEX_NAMESPACE_END

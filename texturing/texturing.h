@@ -15,6 +15,8 @@
 #include "core/mesh.h"
 #include "core/mesh_info.h"
 
+#include "./3rdParty/mrf/graph.h"
+
 #include "defines.h"
 #include "settings.h"
 #include "obj_model.h"
@@ -26,6 +28,8 @@
 
 #include "seam_leveling.h"
 
+typedef SparseTable<std::uint32_t, std::uint16_t, float> ST;
+
 TEX_NAMESPACE_BEGIN
 
 typedef std::vector<TextureView> TextureViews;
@@ -33,9 +37,8 @@ typedef std::vector<TexturePatch::Ptr> TexturePatches;
 typedef std::vector<TextureAtlas::Ptr> TextureAtlases;
 typedef ObjModel Model;
 typedef UniGraph Graph;
-typedef SparseTable<std::uint32_t, std::uint16_t, float> DataCosts;
+typedef ST DataCosts;
 typedef std::vector<std::vector<VertexProjectionInfo> > VertexProjectionInfos;
-typedef std::vector<std::vector<FaceProjectionInfo> > FaceProjectionInfos;
 
 /**
   * prepares the mesh for texturing
@@ -43,21 +46,20 @@ typedef std::vector<std::vector<FaceProjectionInfo> > FaceProjectionInfos;
   *  -ensures normals (face and vertex)
   */
 void
-prepare_mesh(core::MeshInfo * mesh_info, core::TriangleMesh::Ptr mesh);
+prepare_mesh(core::VertexInfoList::Ptr vertex_infos, core::TriangleMesh::Ptr mesh);
 
 /**
   * Generates TextureViews from the in_scene.
   */
 void
-generate_texture_views(std::string const & in_scene,
-    TextureViews * texture_views, std::string const & tmp_dir);
+generate_texture_views(std::string in_scene, TextureViews * texture_views);
 
 /**
   * Builds up the meshes face adjacency graph using the vertex_infos
   */
 void
 build_adjacency_graph(core::TriangleMesh::ConstPtr mesh,
-    core::MeshInfo const & mesh_info, UniGraph * graph);
+    core::VertexInfoList::ConstPtr vertex_infos, UniGraph * graph);
 
 /**
  * Calculates the data costs for each face and texture view combination,
@@ -65,28 +67,21 @@ build_adjacency_graph(core::TriangleMesh::ConstPtr mesh,
  */
 void
 calculate_data_costs(core::TriangleMesh::ConstPtr mesh,
-    TextureViews * texture_views, Settings const & settings,
-    DataCosts * data_costs);
-
-void
-postprocess_face_infos(Settings const & settings,
-    FaceProjectionInfos * projected_face_infos,
-    DataCosts * data_costs);
+    TextureViews * texture_views, Settings const & settings, ST * data_costs);
 
 /**
  * Runs the view selection procedure and saves the labeling in the graph
  */
 void
-view_selection(DataCosts const & data_costs, UniGraph * graph, Settings const & settings);
+view_selection(ST const & data_costs, UniGraph * graph, Settings const & settings);
 
 /**
   * Generates texture patches using the graph to determine adjacent faces with the same label.
   */
 void generate_texture_patches(UniGraph const & graph,
     core::TriangleMesh::ConstPtr mesh,
-    core::MeshInfo const & mesh_info,
+    core::VertexInfoList::ConstPtr vertex_infos,
     TextureViews * texture_views,
-    Settings const & settings,
     VertexProjectionInfos * vertex_projection_infos,
     TexturePatches * texture_patches);
 
@@ -96,7 +91,7 @@ void generate_texture_patches(UniGraph const & graph,
   */
 void
 global_seam_leveling(UniGraph const & graph, core::TriangleMesh::ConstPtr mesh,
-    core::MeshInfo const & mesh_info,
+    core::VertexInfoList::ConstPtr vertex_infos,
     VertexProjectionInfos const & vertex_projection_infos,
     TexturePatches * texture_patches);
 
@@ -107,7 +102,7 @@ local_seam_leveling(UniGraph const & graph, core::TriangleMesh::ConstPtr mesh,
 
 void
 generate_texture_atlases(TexturePatches * texture_patches,
-    Settings const & settings, TextureAtlases * texture_atlases);
+    TextureAtlases * texture_atlases);
 
 /**
   * Builds up an model for the mesh by constructing materials and

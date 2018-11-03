@@ -10,9 +10,9 @@
 #ifndef MVE_DEPTHMAP_HEADER
 #define MVE_DEPTHMAP_HEADER
 
-#include "core/defines.h"
 #include "math/vector.h"
 #include "math/matrix.h"
+#include "core/defines.h"
 #include "core/camera.h"
 #include "core/image.h"
 #include "core/mesh.h"
@@ -61,7 +61,7 @@ depthmap_bilateral_filter (FloatImage::ConstPtr dm,
 template <typename T>
 void
 depthmap_convert_conventions (typename Image<T>::Ptr dm,
-    math::Matrix3f const& invproj, bool to_mve);
+    math::Matrix3f const& invproj, bool to_core);
 
 CORE_IMAGE_NAMESPACE_END
 CORE_NAMESPACE_END
@@ -89,7 +89,7 @@ pixel_3dpos (std::size_t x, std::size_t y, float depth,
     math::Matrix3f const& invproj);
 
 /**
- * \description * Algorithm to triangulate depth maps.
+ * Algorithm to triangulate depth maps.
  *
  * A factor may be specified that guides depth discontinuity detection. A
  * depth discontinuity between pixels is assumed if depth difference is
@@ -100,41 +100,25 @@ pixel_3dpos (std::size_t x, std::size_t y, float depth,
  * If 'vids' is not null, image content is replaced with vertex indices for
  * each pixel that generated the vertex. Index MATH_MAX_UINT corresponds to
  * a pixel that did not generate a vertex.
- * @param dm -- 深度图
- * @param invproj -- 投影矩阵的逆矩阵
- * @param dd_factor -- 不确定因子
- * @param vids --可视图像
- * @return
  */
 TriangleMesh::Ptr
 depthmap_triangulate (FloatImage::ConstPtr dm, math::Matrix3f const& invproj,
     float dd_factor = 5.0f, core::Image<unsigned int>* vids = nullptr);
 
-
- /**
-  * \description A helper function that triangulates the given depth map with optional
-  * color image (which generates additional per-vertex colors) in local
-  * image coordinates.
-  * @param dm
-  * @param ci
-  * @param invproj
-  * @param dd_factor
-  * @return
-  */
+/**
+ * A helper function that triangulates the given depth map with optional
+ * color image (which generates additional per-vertex colors) in local
+ * image coordinates.
+ */
 TriangleMesh::Ptr
 depthmap_triangulate (FloatImage::ConstPtr dm, ByteImage::ConstPtr ci,
     math::Matrix3f const& invproj, float dd_factor = 5.0f);
 
- /**
-  * \description A helper function that triangulates the given depth map with optional
-  * color image (which generates additional per-vertex colors) and transforms
-  * the mesh into the global coordinate system.
-  * @param dm -- 深度图像
-  * @param ci -- 彩色图像
-  * @param cam -- 相机参数
-  * @param dd_factor -- ??
-  * @return
-  */
+/**
+ * A helper function that triangulates the given depth map with optional
+ * color image (which generates additional per-vertex colors) and transforms
+ * the mesh into the global coordinate system.
+ */
 TriangleMesh::Ptr
 depthmap_triangulate (FloatImage::ConstPtr dm, ByteImage::ConstPtr ci,
     CameraInfo const& cam, float dd_factor = 5.0f);
@@ -176,7 +160,7 @@ CORE_IMAGE_NAMESPACE_BEGIN
 template <typename T>
 inline void
 depthmap_convert_conventions (typename Image<T>::Ptr dm,
-    math::Matrix3f const& invproj, bool to_mve)
+    math::Matrix3f const& invproj, bool to_core)
 {
     std::size_t w = dm->width();
     std::size_t h = dm->height();
@@ -190,7 +174,7 @@ depthmap_convert_conventions (typename Image<T>::Ptr dm,
             // Measure length of viewing ray
             double len = px.norm();
             // Either divide or multiply with the length
-            dm->at(pos) *= (to_mve ? len : 1.0 / len);
+            dm->at(pos) *= (to_core ? len : 1.0 / len);
         }
 }
 

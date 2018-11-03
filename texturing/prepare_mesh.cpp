@@ -11,7 +11,7 @@
 
 TEX_NAMESPACE_BEGIN
 
-std::size_t remove_redundant_faces(core::MeshInfo const & mesh_info, core::TriangleMesh::Ptr mesh) {
+std::size_t remove_redundant_faces(core::VertexInfoList::ConstPtr vertex_infos, core::TriangleMesh::Ptr mesh) {
     core::TriangleMesh::FaceList & faces = mesh->get_faces();
     core::TriangleMesh::FaceList new_faces;
     new_faces.reserve(faces.size());
@@ -20,8 +20,9 @@ std::size_t remove_redundant_faces(core::MeshInfo const & mesh_info, core::Trian
     for (std::size_t i = 0; i < faces.size(); i += 3) {
         std::size_t face_id = i / 3;
         bool redundant = false;
+
         for (std::size_t j = 0; !redundant && j < 3; ++j) {
-            core::MeshInfo::AdjacentFaces const & adj_faces = mesh_info[faces[i + j]].faces;
+            core::MeshVertexInfo::FaceRefList const & adj_faces = vertex_infos->at(faces[i + j]).faces;
             for (std::size_t k = 0; !redundant && k < adj_faces.size(); ++k) {
                 std::size_t adj_face_id = adj_faces[k];
 
@@ -45,7 +46,7 @@ std::size_t remove_redundant_faces(core::MeshInfo const & mesh_info, core::Trian
         if (redundant) {
             ++num_redundant;
         } else {
-            new_faces.insert(new_faces.end(), faces.cbegin() + i, faces.cbegin() + i + 3);
+            new_faces.insert(new_faces.end(), &faces[i], &faces[i + 3]);
         }
     }
 
@@ -55,8 +56,10 @@ std::size_t remove_redundant_faces(core::MeshInfo const & mesh_info, core::Trian
 }
 
 void
-prepare_mesh(core::MeshInfo * mesh_info, core::TriangleMesh::Ptr mesh) {
-    std::size_t num_redundant = remove_redundant_faces(*mesh_info, mesh);
+prepare_mesh(core::VertexInfoList::Ptr vertex_infos, core::TriangleMesh::Ptr mesh) {
+
+    // remove redudant mesh
+    std::size_t num_redundant = remove_redundant_faces(vertex_infos, mesh);
     if (num_redundant > 0) {
         std::cout << "\tRemoved " << num_redundant << " redundant faces." << std::endl;
     }
@@ -65,8 +68,7 @@ prepare_mesh(core::MeshInfo * mesh_info, core::TriangleMesh::Ptr mesh) {
     mesh->ensure_normals(true, true);
 
     /* Update vertex infos. */
-    mesh_info->clear();
-    mesh_info->initialize(mesh);
+    vertex_infos->calculate(mesh);
 }
 
 TEX_NAMESPACE_END

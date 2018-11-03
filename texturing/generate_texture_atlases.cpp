@@ -16,7 +16,6 @@
 #include <core/image_tools.h>
 
 #include "defines.h"
-#include "settings.h"
 #include "histogram.h"
 #include "texture_patch.h"
 #include "texture_atlas.h"
@@ -52,10 +51,7 @@ calculate_texture_size(std::list<TexturePatch::ConstPtr> const & texture_patches
             unsigned int area = width * height;
             unsigned int waste = area - texture_patch->get_size();
 
-            /* Only consider patches where the information dominates padding. */
             if (static_cast<double>(waste) / texture_patch->get_size() > 1.0) {
-                /* Since the patches are sorted by size we can assume that only
-                 * few further patches will contribute to the size and break. */
                 break;
             }
 
@@ -86,30 +82,56 @@ calculate_texture_size(std::list<TexturePatch::ConstPtr> const & texture_patches
     }
 }
 
-bool comp(TexturePatch::ConstPtr first, TexturePatch::ConstPtr second) {
-    return first->get_size() > second->get_size();
+std::pair<float, float>
+calculate_mapping_function(std::list<TexturePatch::ConstPtr> const & texture_patches) {
+    float min = std::numeric_limits<float>::max();
+    float max = std::numeric_limits<float>::lowest();
+    for (TexturePatch::ConstPtr texture_patch : texture_patches) {
+        core::FloatImage::ConstPtr image = texture_patch->get_image();
+        core::ByteImage::ConstPtr validity_mask = texture_patch->get_validity_mask();
+        for (int i = 0; i < image->get_value_amount(); ++i) {
+            if (validity_mask->at(i / 3) == 0) continue;
+
+            min = std::min(min, image->at(i));
+            max = std::max(max, image->at(i));
+        }
+    }
+    Histogram hist(min, max, 10000);
+    for (TexturePatch::ConstPtr texture_patch : texture_patches) {
+        core::FloatImage::ConstPtr image = texture_patch->get_image();
+        core::ByteImage::ConstPtr validity_mask = texture_patch->get_validity_mask();
+        for (int i = 0; i < image->get_value_amount(); ++i) {
+            if (validity_mask->at(i / 3) == 0) continue;
+
+            hist.add_value(image->at(i));
+        }
+    }
+    min = hist.get_approx_percentile(0.005f);
+    max = hist.get_approx_percentile(0.995f);
+
+    return std::pair<float, float>(min, max);
 }
 
 void
 generate_texture_atlases(std::vector<TexturePatch::Ptr> * orig_texture_patches,
-    Settings const & settings, std::vector<TextureAtlas::Ptr> * texture_atlases) {
+    std::vector<TextureAtlas::Ptr> * texture_atlases) {
 
     std::list<TexturePatch::ConstPtr> texture_patches;
     while (!orig_texture_patches->empty()) {
-        TexturePatch::Ptr texture_patch = orig_texture_patches->back();
+        //TODO avoid copying
+        texture_patches.push_back(orig_texture_patches->back());
         orig_texture_patches->pop_back();
-
-        if (settings.tone_mapping != TONE_MAPPING_NONE) {
-            core::image::gamma_correct(texture_patch->get_image(), 1.0f / 2.2f);
-        }
-
-        texture_patches.push_back(texture_patch);
     }
+
+    /* Determine (tone) mapping function. */
+    float vmin, vmax;
+    std::tie(vmin, vmax) = calculate_mapping_function(texture_patches);
 
     std::cout << "\tSorting texture patches... " << std::flush;
     /* Improve the bin-packing algorithm efficiency by sorting texture patches
      * in descending order of size. */
-    texture_patches.sort(comp);
+    texture_patches.sort();
+    texture_patches.reverse();
     std::cout << "done." << std::endl;
 
     std::size_t const total_num_patches = texture_patches.size();
@@ -140,7 +162,7 @@ generate_texture_atlases(std::vector<TexturePatch::Ptr> * orig_texture_patches,
                  << precent << "%... " << std::flush;
             }
 
-            if (texture_atlas->insert(*it)) {
+            if (texture_atlas->insert(*it, vmin, vmax)) {
                 it = texture_patches.erase(it);
                 remaining_patches -= 1;
             } else {

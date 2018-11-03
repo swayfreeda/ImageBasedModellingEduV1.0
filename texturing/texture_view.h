@@ -20,15 +20,13 @@
 #include "tri.h"
 #include "settings.h"
 
-TEX_NAMESPACE_BEGIN
-
 /** Struct containing the quality and mean color of a face within a view. */
-struct FaceProjectionInfo {
+struct ProjectedFaceInfo {
     std::uint16_t view_id;
     float quality;
     math::Vec3f mean_color;
 
-    bool operator<(FaceProjectionInfo const & other) const {
+    bool operator<(ProjectedFaceInfo const & other) const {
         return view_id < other.view_id;
     }
 };
@@ -40,34 +38,15 @@ class TextureView {
     private:
         std::size_t id;
 
-        // position of the camera
         math::Vec3f pos;
-
-        // the view dir of the camera
         math::Vec3f viewdir;
-
-        // projection matrix (intrinsic matrix)
         math::Matrix3f projection;
-
-        // transform from world to camera (extrinsic matrix)
         math::Matrix4f world_to_cam;
-
-        // image width
         int width;
-
-        // image height
         int height;
-
-        // image file name
         std::string image_file;
-
-        // image data
         core::ByteImage::Ptr image;
-
-        // gradient of the image
         core::ByteImage::Ptr gradient_magnitude;
-
-        // validity mask for pixel selection
         std::vector<bool> validity_mask;
 
 
@@ -77,7 +56,6 @@ class TextureView {
 
         /** Returns the 2D pixel coordinates of the given vertex projected into the view. */
         math::Vec2f get_pixel_coords(math::Vec3f const & vertex) const;
-
         /** Returns the RGB pixel values [0, 1] for the given vertex projected into the view, calculated by linear interpolation. */
         math::Vec3f get_pixel_values(math::Vec3f const & vertex) const;
 
@@ -96,18 +74,14 @@ class TextureView {
         /** Constructs a TextureView from the give core::CameraInfo containing the given image. */
         TextureView(std::size_t id, core::CameraInfo const & camera, std::string const & image_file);
 
-        /** Returns the camera position. */
+        /** Returns the position. */
         math::Vec3f get_pos(void) const;
-
         /** Returns the viewing direction. */
         math::Vec3f get_viewing_direction(void) const;
-
         /** Returns the width of the corresponding image. */
         int get_width(void) const;
-
         /** Returns the height of the corresponding image. */
         int get_height(void) const;
-
         /** Returns a reference pointer to the corresponding image. */
         core::ByteImage::Ptr get_image(void) const;
 
@@ -116,19 +90,15 @@ class TextureView {
 
         /** Loads the corresponding image. */
         void load_image(void);
-
         /** Generates the validity mask. */
         void generate_validity_mask(void);
-
         /** Generates the gradient magnitude image for the encapsulated image. */
         void generate_gradient_magnitude(void);
 
         /** Releases the validity mask. */
         void release_validity_mask(void);
-
         /** Releases the gradient magnitude image. */
         void release_gradient_magnitude(void);
-
         /** Releases the corresponding image. */
         void release_image(void);
 
@@ -137,7 +107,7 @@ class TextureView {
 
         void
         get_face_info(math::Vec3f const & v1, math::Vec3f const & v2, math::Vec3f const & v3,
-            FaceProjectionInfo * face_info, Settings const & settings) const;
+            ProjectedFaceInfo * face_info, Settings const & settings) const;
 
         void
         export_triangle(math::Vec3f v1, math::Vec3f v2, math::Vec3f v3, std::string const & filename) const;
@@ -215,7 +185,8 @@ TextureView::bind_image(core::ByteImage::Ptr new_image) {
 inline void
 TextureView::release_validity_mask(void) {
     assert(validity_mask.size() == static_cast<std::size_t>(width * height));
-    validity_mask = std::vector<bool>();
+    validity_mask.clear();
+    validity_mask.shrink_to_fit();
 }
 
 inline void
@@ -230,6 +201,6 @@ TextureView::release_image(void) {
     image.reset();
 }
 
-TEX_NAMESPACE_END
-
 #endif /* TEX_TEXTUREVIEW_HEADER */
+
+

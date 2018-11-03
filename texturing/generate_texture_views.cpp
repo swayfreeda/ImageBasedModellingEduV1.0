@@ -65,9 +65,7 @@ from_core_scene(std::string const & scene_dir, std::string const & image_name,
 }
 
 void
-from_images_and_camera_files(std::string const & path,
-    std::vector<TextureView> * texture_views, std::string const & tmp_dir)
-{
+from_images_and_camera_files(std::string const & path, std::vector<TextureView> * texture_views) {
     util::fs::Directory dir(path);
     std::sort(dir.begin(), dir.end());
     std::vector<std::string> files;
@@ -112,14 +110,13 @@ from_images_and_camera_files(std::string const & path,
     #pragma omp parallel for
     for (std::size_t i = 0; i < files.size(); i += 2) {
         view_counter.progress<SIMPLE>();
-        const std::string cam_file = files[i];
-        const std::string img_file = files[i + 1];
+        std::string cam_file = files[i];
+        std::string img_file = files[i + 1];
 
         /* Read CAM file. */
         std::ifstream infile(cam_file.c_str(), std::ios::binary);
-        if (!infile.good()) {
+        if (!infile.good())
             throw util::FileException(util::fs::basename(cam_file), std::strerror(errno));
-        }
         std::string cam_int_str, cam_ext_str;
         std::getline(infile, cam_ext_str);
         std::getline(infile, cam_int_str);
@@ -150,7 +147,7 @@ from_images_and_camera_files(std::string const & path,
         if (ss.peek() && !ss.eof())
             ss >> cam_info.ppoint[1];
 
-        std::string image_file = util::fs::abspath(img_file);
+        std::string image_file = util::fs::abspath(util::fs::join_path(path, img_file));
         if (cam_info.dist[0] != 0.0f) {
             core::ByteImage::Ptr image = core::image::load_file(img_file);
             if (cam_info.dist[1] != 0.0f) {
@@ -161,24 +158,17 @@ from_images_and_camera_files(std::string const & path,
                     cam_info.flen, cam_info.dist[0]);
             }
 
-            image_file = util::fs::join_path(
-                tmp_dir,
-                util::fs::replace_extension(util::fs::basename(img_file), "png")
-            );
+            image_file = std::string("/tmp/") + util::fs::basename(img_file);
             core::image::save_png_file(image, image_file);
         }
-
         #pragma omp critical
         texture_views->push_back(TextureView(i / 2, cam_info, image_file));
-
         view_counter.inc();
     }
 }
 
 void
-from_nvm_scene(std::string const & nvm_file,
-    std::vector<TextureView> * texture_views, std::string const & tmp_dir)
-{
+from_nvm_scene(std::string const & nvm_file, std::vector<TextureView> * texture_views) {
     std::vector<core::NVMCameraInfo> nvm_cams;
     core::Bundle::Ptr bundle = core::load_nvm_bundle(nvm_file, &nvm_cams);
     core::Bundle::Cameras& cameras = bundle->get_cameras();
@@ -198,66 +188,45 @@ from_nvm_scene(std::string const & nvm_file,
         image = core::image::image_undistort_vsfm<uint8_t>
             (image, core_cam.flen, nvm_cam.radial_distortion);
 
-
-        const std::string image_file = util::fs::join_path(
-            tmp_dir,
-            util::fs::replace_extension(
-                util::fs::basename(nvm_cam.filename),
-                "png"
-            )
-        );
+        std::string image_file = std::string("/tmp/") + util::fs::basename(nvm_cam.filename);
         core::image::save_png_file(image, image_file);
 
-        #pragma omp critical
         texture_views->push_back(TextureView(i, core_cam, image_file));
-
         view_counter.inc();
     }
 }
 
 void
-generate_texture_views(std::string const & in_scene,
-    std::vector<TextureView> * texture_views, std::string const & tmp_dir)
-{
+generate_texture_views(std::string in_scene, std::vector<TextureView> * texture_views) {
+    util::Tokenizer tok;
+    tok.split(in_scene, ':', true);
+
     /* Determine input format. */
 
     /* BUNDLEFILE */
-    if (util::fs::file_exists(in_scene.c_str())) {
-        std::string const & file = in_scene;
+    if (tok.size() == 1 && util::fs::file_exists(tok[0].c_str())) {
+        std::string const & file = tok[0];
         std::string extension = util::string::uppercase(util::string::right(file, 3));
-        if (extension == "NVM") {
-            from_nvm_scene(file, texture_views, tmp_dir);
-        }
+        if (extension == "NVM") from_nvm_scene(file, texture_views);
     }
 
     /* SCENE_FOLDER */
-    if (util::fs::dir_exists(in_scene.c_str())) {
-        from_images_and_camera_files(in_scene, texture_views, tmp_dir);
+    if (tok.size() == 1 && util::fs::dir_exists(tok[0].c_str())) {
+        from_images_and_camera_files(tok[0], texture_views);
     }
 
     /* MVE_SCENE::EMBEDDING */
-    size_t pos = in_scene.rfind("::");
-    if (pos != std::string::npos) {
-        std::string scene_dir = in_scene.substr(0, pos);
-        std::string image_name = in_scene.substr(pos + 2, in_scene.size());
-        from_core_scene(scene_dir, image_name, texture_views);
+    if (tok.size() == 3 && tok[1].empty()) {
+        from_core_scene(tok[0], tok[2], texture_views);
     }
-
-    std::sort(texture_views->begin(), texture_views->end(),
-        [] (TextureView const & l, TextureView const & r) -> bool {
-            return l.get_id() < r.get_id();
-        }
-    );
 
     std::size_t num_views = texture_views->size();
     if (num_views == 0) {
-        std::cerr
-            << "No proper input scene descriptor given.\n"
-            << "A input descriptor can be:\n"
-            << "BUNDLE_FILE - a bundle file (currently onle .nvm files are supported)\n"
-            << "SCENE_FOLDER - a folder containing images and .cam files\n"
-            << "MVE_SCENE::EMBEDDING - a core scene and embedding\n"
-            << std::endl;
+        std::cerr << "No proper input scene descriptor given." << std::endl
+            << "A input descriptor can be:" << std::endl
+            << "BUNDLE_FILE - a bundle file (currently onle .nvm files are supported)" << std::endl
+            << "SCENE_FOLDER - a folder containing images and .cam files" << std::endl
+            << "MVE_SCENE::EMBEDDING - a core scene and embedding" << std::endl;
         exit(EXIT_FAILURE);
     }
 }

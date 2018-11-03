@@ -47,7 +47,8 @@ Rect<T>::Rect(void) {
 }
 
 template <typename T>
-Rect<T>::Rect(Rect<T> * rect) {
+Rect<T>::Rect(Rect<T> * rect)
+    : min_x(rect->min_x), min_y(rect->min_y), max_x(rect->max_x), max_y(rect->max_y) {
     update(rect->min_x, rect->min_y, rect->max_x, rect->max_y);
 }
 

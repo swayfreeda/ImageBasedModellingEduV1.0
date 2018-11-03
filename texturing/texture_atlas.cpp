@@ -22,6 +22,14 @@ TextureAtlas::TextureAtlas(unsigned int size) :
     bin = RectangularBin::create(size, size);
     image = core::ByteImage::create(size, size, 3);
     validity_mask = core::ByteImage::create(size, size, 1);
+    filename = std::tmpnam(nullptr);
+    std::cout << filename << std::endl;
+}
+
+TextureAtlas::~TextureAtlas() {
+    if (util::fs::exists(filename.c_str())) {
+        util::fs::unlink(filename.c_str());
+    }
 }
 
 /**
@@ -54,7 +62,7 @@ typedef std::vector<std::pair<int, int> > PixelVector;
 typedef std::set<std::pair<int, int> > PixelSet;
 
 bool
-TextureAtlas::insert(TexturePatch::ConstPtr texture_patch) {
+TextureAtlas::insert(TexturePatch::ConstPtr texture_patch, float vmin, float vmax) {
     if (finalized) {
         throw util::Exception("No insertion possible, TextureAtlas already finalized");
     }
@@ -69,7 +77,8 @@ TextureAtlas::insert(TexturePatch::ConstPtr texture_patch) {
 
     /* Update texture atlas and its validity mask. */
     core::ByteImage::Ptr patch_image = core::image::float_to_byte_image(
-        texture_patch->get_image(), 0.0f, 1.0f);
+        texture_patch->get_image(), vmin, vmax);
+    core::image::gamma_correct(patch_image, 1.0f / 2.2f);
 
     copy_into(patch_image, rect.min_x, rect.min_y, image, padding);
     core::ByteImage::ConstPtr patch_validity_mask = texture_patch->get_validity_mask();
@@ -89,8 +98,8 @@ TextureAtlas::insert(TexturePatch::ConstPtr texture_patch) {
             math::Vec2f rel_texcoord(patch_texcoords[i * 3 + j]);
             math::Vec2f texcoord = rel_texcoord + offset;
 
-            texcoord[0] = texcoord[0] / this->size;
-            texcoord[1] = texcoord[1] / this->size;
+            texcoord[0] = texcoord[0] / (this->size - 1);
+            texcoord[1] = texcoord[1] / (this->size - 1);
             texcoords.push_back(texcoord);
         }
     }
@@ -212,12 +221,15 @@ TextureAtlas::apply_edge_padding(void) {
 }
 
 struct VectorCompare {
-    bool operator()(math::Vec2f const & lhs, math::Vec2f const & rhs) const {
+    bool operator()(math::Vec2f const & lhs, math::Vec2f const & rhs)const {
         return lhs[0] < rhs[0] || (lhs[0] == rhs[0] && lhs[1] < rhs[1]);
     }
 };
 
 typedef std::map<math::Vec2f, std::size_t, VectorCompare> TexcoordMap;
+
+
+
 
 void
 TextureAtlas::merge_texcoords() {
@@ -248,6 +260,9 @@ TextureAtlas::finalize() {
     this->apply_edge_padding();
     this->validity_mask.reset();
     this->merge_texcoords();
+
+    core::image::save_png_file(this->image, this->filename);
+    this->image.reset();
 
     this->finalized = true;
 }

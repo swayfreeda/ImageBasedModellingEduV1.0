@@ -53,11 +53,8 @@ mesh_transform (core::TriangleMesh::Ptr mesh, math::Matrix3f const& rot)
     core::TriangleMesh::NormalList& fnorm(mesh->get_face_normals());
 
     math::algo::foreach_matrix_mult<math::Matrix3f, math::Vec3f> func(rot);
-    // 对网格顶点坐标进行变换
     std::for_each(verts.begin(), verts.end(), func);
-    // 对面片法向量进行变换
     std::for_each(fnorm.begin(), fnorm.end(), func);
-    // 对顶点法向量进行变换
     std::for_each(vnorm.begin(), vnorm.end(), func);
 }
 
@@ -69,11 +66,8 @@ mesh_transform (TriangleMesh::Ptr mesh, math::Matrix4f const& trans)
     if (mesh == nullptr)
         throw std::invalid_argument("Null mesh given");
 
-    // 网格顶点
     core::TriangleMesh::VertexList& verts(mesh->get_vertices());
-    // 顶点法向量
     core::TriangleMesh::NormalList& vnorm(mesh->get_vertex_normals());
-    // 面片法向量
     core::TriangleMesh::NormalList& fnorm(mesh->get_face_normals());
 
     foreach_hmatrix_mult<float, 4> vfunc(trans, 1.0f);
@@ -133,11 +127,11 @@ mesh_merge (TriangleMesh::ConstPtr mesh1, TriangleMesh::Ptr mesh2)
 void
 mesh_components (TriangleMesh::Ptr mesh, std::size_t vertex_threshold)
 {
-    MeshInfo mesh_info(mesh);
-    std::size_t const num_vertices = mesh->get_vertices().size();
-    std::vector<int> component_per_vertex(num_vertices, -1);
+    TriangleMesh::VertexList const& verts = mesh->get_vertices();
+    VertexInfoList vinfos(mesh);
+    std::vector<int> component_per_vertex(vinfos.size(), -1);
     int current_component = 0;
-    for (std::size_t i = 0; i < num_vertices; ++i)
+    for (std::size_t i = 0; i < vinfos.size(); ++i)
     {
         /* Start with a vertex that has no component yet. */
         if (component_per_vertex[i] >= 0)
@@ -157,12 +151,12 @@ mesh_components (TriangleMesh::Ptr mesh, std::size_t vertex_threshold)
             component_per_vertex[vid] = current_component;
 
             /* Add all adjacent vertices to queue. */
-            MeshInfo::AdjacentVertices const& adj_verts = mesh_info[vid].verts;
+            MeshVertexInfo::VertexRefList const& adj_verts = vinfos[vid].verts;
             queue.insert(queue.end(), adj_verts.begin(), adj_verts.end());
         }
         current_component += 1;
     }
-    mesh_info.clear();
+    vinfos.clear();
 
     /* Create a list of components and count vertices per component. */
     std::vector<std::size_t> components_size(current_component, 0);
@@ -170,7 +164,7 @@ mesh_components (TriangleMesh::Ptr mesh, std::size_t vertex_threshold)
         components_size[component_per_vertex[i]] += 1;
 
     /* Mark vertices to be deleted if part of a small component. */
-    TriangleMesh::DeleteList delete_list(num_vertices, false);
+    TriangleMesh::DeleteList delete_list(verts.size(), false);
     for (std::size_t i = 0; i < component_per_vertex.size(); ++i)
         if (components_size[component_per_vertex[i]] <= vertex_threshold)
             delete_list[i] = true;
@@ -274,12 +268,12 @@ mesh_delete_unreferenced (TriangleMesh::Ptr mesh)
     if (mesh == nullptr)
         throw std::invalid_argument("Null mesh given");
 
-    MeshInfo mesh_info(mesh);
-    TriangleMesh::DeleteList dlist(mesh_info.size(), false);
+    VertexInfoList vinfos(mesh);
+    TriangleMesh::DeleteList dlist(vinfos.size(), false);
     std::size_t num_deleted = 0;
-    for (std::size_t i = 0; i < mesh_info.size(); ++i)
+    for (std::size_t i = 0; i < vinfos.size(); ++i)
     {
-        if (mesh_info[i].vclass == MeshInfo::VERTEX_CLASS_UNREF)
+        if (vinfos[i].vclass == VERTEX_CLASS_UNREF)
         {
             dlist[i] = true;
             num_deleted += 1;

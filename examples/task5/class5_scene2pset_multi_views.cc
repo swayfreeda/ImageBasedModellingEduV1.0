@@ -114,11 +114,11 @@ main (int argc, char** argv)
         /* Triangulate depth map. */
         core::TriangleMesh::Ptr mesh;
         mesh = core::geom::depthmap_triangulate(dm, ci, cam);
-
-        core::TriangleMesh::VertexList const& corerts(mesh->get_vertices());
+        core::TriangleMesh::VertexList const& mverts(mesh->get_vertices());
         core::TriangleMesh::NormalList const& mnorms(mesh->get_vertex_normals());
         core::TriangleMesh::ColorList const& mvcol(mesh->get_vertex_colors());
         core::TriangleMesh::ConfidenceList& mconfs(mesh->get_vertex_confidences());
+
 
         if (conf.with_normals)
             mesh->ensure_normals();
@@ -132,15 +132,13 @@ main (int argc, char** argv)
         /* If scale is requested, compute it. */
         std::vector<float> mvscale;
         if (conf.with_scale) {
-            mvscale.resize(corerts.size(), 0.0f);
-            core::MeshInfo mesh_info(mesh);
-            // 遍历每一个顶点的信息
-            for (std::size_t j = 0; j < mesh_info.size(); ++j) {
-                // 获取每一个顶点的信息
-                core::MeshInfo::VertexInfo const& vinf = mesh_info[j];
-                // 顶点到所有邻域的距离的平均值，类似于求顶点的分辨率
+            mvscale.resize(mverts.size(), 0.0f);
+            core::VertexInfoList::Ptr vinfo = core::VertexInfoList::create(mesh);
+            for (std::size_t j = 0; j < vinfo->size(); ++j)
+            {
+                core::MeshVertexInfo const& vinf = vinfo->at(j);
                 for (std::size_t k = 0; k < vinf.verts.size(); ++k)
-                    mvscale[j] += (corerts[j] - corerts[vinf.verts[k]]).norm();
+                    mvscale[j] += (mverts[j] - mverts[vinf.verts[k]]).norm();
                 mvscale[j] /= static_cast<float>(vinf.verts.size());
                 mvscale[j] *= conf.scale_factor;
             }
@@ -148,7 +146,7 @@ main (int argc, char** argv)
 
         // 将所有视角的三维点云集中到一起
         // 顶点坐标
-        verts.insert(verts.end(), corerts.begin(), corerts.end());
+        verts.insert(verts.end(), mverts.begin(), mverts.end());
         // 顶点颜色
         if (!mvcol.empty())
            vcolor.insert(vcolor.end(), mvcol.begin(), mvcol.end());

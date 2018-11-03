@@ -13,7 +13,6 @@ Timer::Timer(void) {
     header = "";
     ctimer = util::ClockTimer();
     wtimer = util::WallTimer();
-    measure("Init");
 }
 
 Timer::Timer(std::string const & _header) {

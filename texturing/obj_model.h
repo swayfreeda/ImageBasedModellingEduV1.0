@@ -43,6 +43,7 @@ private:
 public:
     /** Saves the obj model to an .obj file, its material lib and the materials with the given prefix. */
     void save_to_files(std::string const & prefix) const;
+    ObjModel();
 
     MaterialLib & get_material_lib(void);
     Vertices & get_vertices(void);
