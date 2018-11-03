@@ -240,10 +240,8 @@ clean_caps (core::TriangleMesh::Ptr mesh)
 }
 
 /* ---------------------------------------------------------------- */
-
 std::size_t
-clean_mc_mesh (core::TriangleMesh::Ptr mesh, float needle_ratio_thres)
-{
+clean_mc_mesh (core::TriangleMesh::Ptr mesh, float needle_ratio_thres) {
     std::size_t num_collapsed = 0;
     num_collapsed += clean_needles(mesh, needle_ratio_thres);
     num_collapsed += clean_caps(mesh);

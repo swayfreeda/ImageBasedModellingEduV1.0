@@ -18,21 +18,27 @@ CORE_NAMESPACE_BEGIN
 void
 MeshInfo::initialize (TriangleMesh::ConstPtr mesh)
 {
+    // vertices of the mesh
     TriangleMesh::VertexList const& verts = mesh->get_vertices();
+    // facets of the mesh
     TriangleMesh::FaceList const& faces = mesh->get_faces();
+    // number of facets
     std::size_t face_amount = faces.size() / 3;
 
     this->vertex_info.clear();
     this->vertex_info.resize(verts.size());
 
     /* Add faces to their three vertices. */
-    for (std::size_t i = 0, i3 = 0; i < face_amount; ++i)
-        for (std::size_t j = 0; j < 3; ++j, ++i3)
+    for (std::size_t i = 0, i3 = 0; i < face_amount; ++i) {
+        for (std::size_t j = 0; j < 3; ++j, ++i3) {
             this->vertex_info[faces[i3]].faces.push_back(i);
+        }
+    }
 
     /* Classify each vertex and compute adjacenty info. */
-    for (std::size_t i = 0; i < this->vertex_info.size(); ++i)
+    for (std::size_t i = 0; i < this->vertex_info.size(); ++i){
         this->update_vertex(*mesh, i);
+    }
 }
 
 /* ---------------------------------------------------------------- */

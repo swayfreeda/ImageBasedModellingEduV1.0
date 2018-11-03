@@ -41,8 +41,13 @@ public:
     /** Per-vertex classification and adjacency information. */
     struct VertexInfo
     {
+        // vertex class
         VertexClass vclass;
+
+        // indices of adjacent vertices
         AdjacentVertices verts;
+
+        // indices of adjacent facets
         AdjacentFaces faces;
 
         void remove_adjacent_face (std::size_t face_id);
@@ -101,66 +106,54 @@ MeshInfo::MeshInfo (TriangleMesh::ConstPtr mesh)
 }
 
 inline MeshInfo::VertexInfo&
-MeshInfo::operator[] (std::size_t id)
-{
+MeshInfo::operator[] (std::size_t id) {
     return this->vertex_info[id];
 }
 
 inline MeshInfo::VertexInfo const&
-MeshInfo::operator[] (std::size_t id) const
-{
+MeshInfo::operator[] (std::size_t id) const {
     return this->vertex_info[id];
 }
 
 inline MeshInfo::VertexInfo&
-MeshInfo::at (std::size_t id)
-{
+MeshInfo::at (std::size_t id) {
     return this->vertex_info[id];
 }
 
 inline MeshInfo::VertexInfo const&
-MeshInfo::at (std::size_t id) const
-{
+MeshInfo::at (std::size_t id) const {
     return this->vertex_info[id];
 }
 
 inline std::size_t
-MeshInfo::size (void) const
-{
+MeshInfo::size (void) const {
     return this->vertex_info.size();
 }
 
 inline void
-MeshInfo::clear (void)
-{
+MeshInfo::clear (void) {
     std::vector<VertexInfo>().swap(this->vertex_info);
 }
 
 inline void
-MeshInfo::VertexInfo::remove_adjacent_face (std::size_t face_id)
-{
-    this->faces.erase(std::remove(this->faces.begin(), this->faces.end(),
-        face_id), this->faces.end());
+MeshInfo::VertexInfo::remove_adjacent_face (std::size_t face_id) {
+    this->faces.erase(std::remove(this->faces.begin(), this->faces.end(), face_id), this->faces.end());
 }
 
 inline void
-MeshInfo::VertexInfo::remove_adjacent_vertex (std::size_t vertex_id)
-{
-    this->verts.erase(std::remove(this->verts.begin(), this->verts.end(),
-        vertex_id), this->verts.end());
+MeshInfo::VertexInfo::remove_adjacent_vertex (std::size_t vertex_id) {
+    this->verts.erase(std::remove(this->verts.begin(), this->verts.end(), vertex_id), this->verts.end());
 }
 
 inline void
 MeshInfo::VertexInfo::replace_adjacent_face (std::size_t old_id,
-    std::size_t new_id)
-{
+    std::size_t new_id) {
     std::replace(this->faces.begin(), this->faces.end(), old_id, new_id);
 }
 
 inline void
 MeshInfo::VertexInfo::replace_adjacent_vertex (std::size_t old_id,
-    std::size_t new_id)
-{
+    std::size_t new_id) {
     std::replace(this->verts.begin(), this->verts.end(), old_id, new_id);
 }
 

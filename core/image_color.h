@@ -11,11 +11,11 @@
 #define MVE_IMAGE_COLOR_HEADER
 
 #include "math/functions.h"
-#include "mve/image.h"
-#include "mve/defines.h"
+#include "core/image.h"
+#include "core/defines.h"
 
-MVE_NAMESPACE_BEGIN
-MVE_IMAGE_NAMESPACE_BEGIN
+CORE_NAMESPACE_BEGIN
+CORE_IMAGE_NAMESPACE_BEGIN
 
 /**
  * Applies an in-place color conversion to the given image. The conversion
@@ -325,7 +325,7 @@ color_ycbcr_to_rgb<uint8_t> (uint8_t* v)
     v[2] = std::max(0.0, std::min(255.0, math::round(out[2])));
 }
 
-MVE_IMAGE_NAMESPACE_END
-MVE_NAMESPACE_END
+CORE_IMAGE_NAMESPACE_END
+CORE_NAMESPACE_END
 
 #endif /* MVE_IMAGE_COLOR_HEADER */
