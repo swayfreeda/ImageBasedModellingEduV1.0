@@ -2,6 +2,8 @@ project(texturing)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "-fPIC")
 
+add_definitions(-DRESEARCH)
+
 include_directories(..)
 include_directories(../3rdParty/mrf)
 include_directories(../3rdParty/coldet/src)

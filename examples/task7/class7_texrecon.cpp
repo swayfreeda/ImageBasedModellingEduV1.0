@@ -15,6 +15,9 @@
 #include <util/system.h>
 #include <util/file_system.h>
 #include <core/mesh_io_ply.h>
+#include <core/image_tools.h>
+#include <core/image_drawing.h>
+#include "core/image_io.h"
 
 #include "texturing/util.h"
 #include "texturing/timer.h"
@@ -65,7 +68,6 @@ int main(int argc, char **argv) {
     tex::prepare_mesh(vertex_infos, mesh);
 
 
-
     //=================================Geneatring texture views=====================//
     std::size_t const num_faces = mesh->get_faces().size() / 3;
     std::cout << "Generating texture views: " << std::endl;
@@ -76,14 +78,10 @@ int main(int argc, char **argv) {
 
 
     //===============================Building adjacency graph=======================//
-    std::cout << "Building adjacency graph: " << std::endl;
+    std::cout << "Building adjacency graph: " << std::endl; // each facet is corresponding a facet
     tex::Graph graph(num_faces);
     tex::build_adjacency_graph(mesh, vertex_infos, &graph);
     wtimer.reset();
-
-
-/****** 2015/12/11 yangliang  *************/
-
 
 
     //===============================View Selection ================================//
@@ -154,8 +152,62 @@ int main(int argc, char **argv) {
         std::cout << "done." << std::endl;
     }
     std::cout << "\tTook: " << wtimer.get_elapsed_sec() << "s" << std::endl;
+    // todo rendering the mesh with different colors
+    {
+        std::vector<std::size_t> labeling(graph.num_nodes());
+        for (std::size_t i = 0; i < graph.num_nodes(); ++i) {
+            labeling[i] = graph.get_label(i);
+        }
+        std::vector<std::size_t>::iterator max_iter = std::max_element(labeling.begin(), labeling.end());
+        int n_labels = *max_iter + 1;
+        std::vector<math::Vec3f> colors(n_labels);
+        colors[0][0] = 0;
+        colors[0][1] = 0;
+        colors[0][2] = 0;
 
+        for(int i=1; i< colors.size(); i++){
+            colors[i][0] = rand()&255;
+            colors[i][1] = rand()&255;
+            colors[i][2] = rand()&255;
+        }
 
+        std::ofstream out("./examples/task7/view_selection_result.ply");
+        assert(out.is_open());
+        out<<"ply"<<std::endl;
+        out<<"format ascii 1.0"<<std::endl;
+        out<<"element vertex "<<mesh->get_vertices().size()<<std::endl;
+        out<<"property float x"<<std::endl;
+        out<<"property float y"<<std::endl;
+        out<<"property float z"<<std::endl;
+        out<<"element face "<<mesh->get_faces().size()/3<<std::endl;
+        out<<"property list uchar int vertex_indices"<<std::endl;
+        out<<"property uchar red"<<std::endl;
+        out<<"property uchar green"<<std::endl;
+        out<<"property uchar blue"<<std::endl;
+        out<<"end_header"<<std::endl;
+
+        // Face List
+        core::TriangleMesh::FaceList const & mesh_faces = mesh->get_faces();
+        // Vertices
+        core::TriangleMesh::VertexList const & vertices = mesh->get_vertices();
+        for(int i=0; i< vertices.size(); i++){
+            out<<vertices[i][0]<<" "<<vertices[i][1]<<" "<<vertices[i][2]<<std::endl;
+        }
+
+        std::cout<<"labeling size: "<<labeling.size()<<" faces size: "<<num_faces<<std::endl;
+        for(int i=0; i< labeling.size(); i++){
+            int label = labeling[i];
+            assert(label>=0 && label <labeling.size());
+            int v0 = mesh_faces[3*i + 0];
+            int v1 = mesh_faces[3*i + 1];
+            int v2 = mesh_faces[3*i + 2];
+            int r = colors[label][0];
+            int g = colors[label][1];
+            int b = colors[label][2];
+            out<<"3 "<<v0<<" "<<v1<<" "<<v2<<" "<<r<<" "<<g<<" "<<b<<std::endl;
+        }
+        out.close();
+    }
 
     //=============================================texture_atlases====================================================//
     tex::TextureAtlases texture_atlases;
@@ -171,6 +223,44 @@ int main(int argc, char **argv) {
                                       &vertex_projection_infos,
                                       &texture_patches);
 
+        // todo save texturePatches and the projection of facets
+        {
+            for(int i=0; i< texture_patches.size(); i++)
+            {
+                if(texture_patches[i]->get_faces().size()<10000)continue;
+
+                char image_name[255];
+                char validity_mask_name[255];
+                char blending_mask_name[255];
+
+                sprintf(image_name,"examples/task7/texture_patches_init/texture_patch%d.jpg", i);
+                sprintf(blending_mask_name,"examples/task7/texture_patches_init/blending_mask%d.jpg", i);
+                sprintf(validity_mask_name,"examples/task7/texture_patches_init/validity_mask%d.jpg", i);
+
+                core::FloatImage::Ptr image = texture_patches[i]->get_image()->duplicate();
+                core::ByteImage::Ptr validity_mask = texture_patches[i]->get_validity_mask()->duplicate();
+                core::ByteImage::Ptr blending_mask = texture_patches[i]->get_blending_mask()->duplicate();
+
+                float color[3]={255, 0,0};
+                std::vector<math::Vec2f> texcoords = texture_patches[i]->get_texcoords();
+                for(int i=0; i< texcoords.size(); i+=3){
+                    math::Vec2f v0 = texcoords[i+0];
+                    math::Vec2f v1 = texcoords[i+1];
+                    math::Vec2f v2 = texcoords[i+2];
+
+                    core::image::draw_line<float>(*image, int(v0[0]), int(v0[1]), int(v1[0]), int(v1[1]), color);
+                    core::image::draw_line<float>(*image, int(v1[0]), int(v1[1]), int(v2[0]), int(v2[1]), color);
+                    core::image::draw_line<float>(*image, int(v0[0]), int(v0[1]), int(v2[0]), int(v2[1]), color);
+
+                }
+
+                core::image::save_file(core::image::float_to_byte_image(image), image_name);
+                core::image::save_file(validity_mask, validity_mask_name);
+                core::image::save_file(blending_mask, blending_mask_name);
+
+            }
+        }
+
         // Global seam leveling
         if (conf.settings.global_seam_leveling) {
             std::cout << "Running global seam leveling:" << std::endl;
@@ -180,6 +270,44 @@ int main(int argc, char **argv) {
                                       vertex_projection_infos,
                                       &texture_patches);
             timer.measure("Running global seam leveling");
+
+            {
+                for(int i=0; i< texture_patches.size(); i++)
+                {
+                    if(texture_patches[i]->get_faces().size()<10000)continue;
+
+                    char image_name[255];
+                    char validity_mask_name[255];
+                    char blending_mask_name[255];
+
+                    sprintf(image_name,"examples/task7/texture_pathes_color_adjustment/texture_patch%d.jpg", i);
+                    sprintf(blending_mask_name,"examples/task7/texture_pathes_color_adjustment/blending_mask%d.jpg", i);
+                    sprintf(validity_mask_name,"examples/task7/texture_pathes_color_adjustment/validity_mask%d.jpg", i);
+
+                    core::FloatImage::Ptr image = texture_patches[i]->get_image()->duplicate();
+                    core::ByteImage::Ptr validity_mask = texture_patches[i]->get_validity_mask()->duplicate();
+                    core::ByteImage::Ptr blending_mask = texture_patches[i]->get_blending_mask()->duplicate();
+
+                    float color[3]={255, 0,0};
+                    std::vector<math::Vec2f> texcoords = texture_patches[i]->get_texcoords();
+                    for(int i=0; i< texcoords.size(); i+=3){
+                        math::Vec2f v0 = texcoords[i+0];
+                        math::Vec2f v1 = texcoords[i+1];
+                        math::Vec2f v2 = texcoords[i+2];
+
+                        core::image::draw_line<float>(*image, int(v0[0]), int(v0[1]), int(v1[0]), int(v1[1]), color);
+                        core::image::draw_line<float>(*image, int(v1[0]), int(v1[1]), int(v2[0]), int(v2[1]), color);
+                        core::image::draw_line<float>(*image, int(v0[0]), int(v0[1]), int(v2[0]), int(v2[1]), color);
+
+                    }
+
+                    core::image::save_file(core::image::float_to_byte_image(image), image_name);
+                    core::image::save_file(validity_mask, validity_mask_name);
+                    core::image::save_file(blending_mask, blending_mask_name);
+
+                }
+            }
+
         } else {
             ProgressCounter texture_patch_counter("Calculating validity masks for texture patches", texture_patches.size());
             #pragma omp parallel for schedule(dynamic)
@@ -193,6 +321,7 @@ int main(int argc, char **argv) {
             timer.measure("Calculating texture patch validity masks");
         }
 
+
         //======================================local seam leveling===========================//
         // Local seam leveling (Poisson Editing???)
         if (conf.settings.local_seam_leveling) {
@@ -203,7 +332,6 @@ int main(int argc, char **argv) {
 
 
         //====================================Generating textgure atlases====================//
-        // Generate texture atlases
         /* Generate texture atlases. */
         std::cout << "Generating texture atlases:" << std::endl;
         tex::generate_texture_atlases(&texture_patches, &texture_atlases);

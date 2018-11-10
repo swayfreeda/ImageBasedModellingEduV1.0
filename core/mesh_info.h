@@ -73,6 +73,7 @@ public:
 public:
     /* Creates an uninitialized vertex info list. */
     VertexInfoList (void);
+
     /* Creates and initializes a vertex info list. */
     VertexInfoList (TriangleMesh::ConstPtr mesh);
 

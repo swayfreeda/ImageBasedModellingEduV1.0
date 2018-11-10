@@ -86,6 +86,7 @@ std::pair<float, float>
 calculate_mapping_function(std::list<TexturePatch::ConstPtr> const & texture_patches) {
     float min = std::numeric_limits<float>::max();
     float max = std::numeric_limits<float>::lowest();
+    // for each texture patch
     for (TexturePatch::ConstPtr texture_patch : texture_patches) {
         core::FloatImage::ConstPtr image = texture_patch->get_image();
         core::ByteImage::ConstPtr validity_mask = texture_patch->get_validity_mask();

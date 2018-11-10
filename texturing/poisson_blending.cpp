@@ -58,9 +58,13 @@ poisson_blend(core::FloatImage::ConstPtr src, core::ByteImage::ConstPtr mask,
     assert(mask->channels() == 1);
     assert(valid_mask(mask));
 
+    // number of pixels
     const int n = dest->get_pixel_amount();
+    // number of image width
     const int width = dest->width();
+    // number of image height
     const int height = dest->height();
+    // number of channels
     const int channels = dest->channels();
 
     core::Image<int>::Ptr indices = core::Image<int>::create(width, height, 1);
@@ -114,6 +118,7 @@ poisson_blend(core::FloatImage::ConstPtr src, core::ByteImage::ConstPtr mask,
             math::Vec3f l_d = simple_laplacian(i, dest);
             math::Vec3f l_s = simple_laplacian(i, src);
 
+            // mixture of gradients
             coefficients_b[row] = (alpha * l_s + (1.0f - alpha) * l_d);
         }
     }

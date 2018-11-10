@@ -175,8 +175,7 @@ gamma_correct (ByteImage::Ptr image, float power)
 
     uint8_t lookup[256];
     for (int i = 0; i < 256; ++i)
-        lookup[i] = static_cast<uint8_t>(std::pow(i / 255.0f, power)
-            * 255.0f + 0.5f);
+        lookup[i] = static_cast<uint8_t>(std::pow(i / 255.0f, power) * 255.0f + 0.5f);
     for (int i = 0; i < image->get_value_amount(); ++i)
         image->at(i) = lookup[image->at(i)];
 }

@@ -75,9 +75,15 @@ calculate_data_costs(core::TriangleMesh::ConstPtr mesh,
 void
 view_selection(ST const & data_costs, UniGraph * graph, Settings const & settings);
 
-/**
-  * Generates texture patches using the graph to determine adjacent faces with the same label.
-  */
+  /**
+   * \decription Generates texture patches using the graph to determine adjacent faces with the same label.
+   * @param graph -- uniongraph with labels
+   * @param mesh -- triangle mesh
+   * @param vertex_infos -- vertex infos (vertex neighbours and facet neighbours)
+   * @param texture_views -- (texture views)
+   * @param vertex_projection_infos --
+   * @param texture_patches --
+   */
 void generate_texture_patches(UniGraph const & graph,
     core::TriangleMesh::ConstPtr mesh,
     core::VertexInfoList::ConstPtr vertex_infos,

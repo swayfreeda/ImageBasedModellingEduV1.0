@@ -8,6 +8,8 @@
  */
 
 #include <math/accum.h>
+#include <core/image_io.h>
+#include <core/image_tools.h>
 
 #include "progress_counter.h"
 #include "texturing.h"
@@ -97,16 +99,15 @@ local_seam_leveling(UniGraph const & graph,
         orig_texture_patches[i] = texture_patches->at(i)->duplicate();
     }
 
+    // number of vertices
     std::size_t const num_vertices = vertex_projection_infos.size();
 
     {
-        //=======================================Find all the seam edges=====================================//
+        /*Find all the seam edges*/
         std::vector<MeshEdge> seam_edges;
         find_seam_edges(graph, mesh, &seam_edges);
 
-
-
-        //========================================draw colors of edges============================================//
+        /*draw colors of edges*/
         for (MeshEdge seam_edge : seam_edges){
             std::vector<ProjectedEdgeInfo> projected_edge_infos;
 
@@ -156,7 +157,60 @@ local_seam_leveling(UniGraph const & graph,
             texture_patch->prepare_blending_mask(STRIP_SIZE);
         }
 
+        if(texture_patch->get_faces().size()<10000)continue;
+        char image_name_before[255];
+        char image_name_after[255];
+        char validity_mask_name[255];
+        char blending_mask_name[255];
+        sprintf(image_name_before,"examples/task7/texture_patches_poisson_blending/texture_patch_before%d.jpg", i);
+        sprintf(image_name_after,"examples/task7/texture_patches_poisson_blending/texture_patch_after%d.jpg", i);
+        sprintf(blending_mask_name,"examples/task7/texture_patches_poisson_blending/blending_mask%d.jpg", i);
+        sprintf(validity_mask_name,"examples/task7/texture_patches_poisson_blending/validity_mask%d.jpg", i);
+        core::FloatImage::Ptr image = texture_patch->get_image()->duplicate();
+        core::ByteImage::Ptr validity_mask = texture_patch->get_validity_mask()->duplicate();
+        core::ByteImage::Ptr blending_mask = texture_patch->get_blending_mask()->duplicate();
+
+        core::ByteImage::Ptr blending_mask_color = core::ByteImage::create(blending_mask->width()
+                , blending_mask->height(), 3);
+        //blending_mask_color->fill_color({0});
+
+        for (int y = 0; y < blending_mask->height(); ++y) {
+            for (int x = 0; x < blending_mask->width(); ++x) {
+
+                blending_mask_color->at(x, y, 0) = 0;
+                blending_mask_color->at(x, y, 1) = 255;
+                blending_mask_color->at(x, y, 2) = 0;
+
+                if (blending_mask->at(x, y, 0) == 128) {
+                    blending_mask_color->at(x, y, 0) = 255;
+                    blending_mask_color->at(x, y, 1) = 0;
+                    blending_mask_color->at(x, y, 2) = 0;
+                }
+                if (blending_mask->at(x, y, 0) == 126) {
+                    blending_mask_color->at(x, y, 0) = 0;
+                    blending_mask_color->at(x, y, 1) = 0;
+                    blending_mask_color->at(x, y, 2) = 255;
+                }
+
+                if (blending_mask->at(x, y, 0) == 255) {
+                    blending_mask_color->at(x, y, 0) = 255;
+                    blending_mask_color->at(x, y, 1) = 255;
+                    blending_mask_color->at(x, y, 2) = 255;
+                }
+            }
+        }
+        core::image::save_file(core::image::float_to_byte_image(image), image_name_before);
+        core::image::save_file(validity_mask, validity_mask_name);
+        core::image::save_file(blending_mask_color, blending_mask_name);
+
+        // poisson blending
         texture_patch->blend(orig_texture_patches[i]->get_image());
+
+
+        image = texture_patch->get_image()->duplicate();
+        core::image::save_file(core::image::float_to_byte_image(image), image_name_after);
+
+
         texture_patch->release_blending_mask();
         texture_patch_counter.inc();
     }

@@ -17,13 +17,16 @@ void
 build_adjacency_graph(core::TriangleMesh::ConstPtr mesh,
     core::VertexInfoList::ConstPtr vertex_infos, UniGraph * graph)  {
 
+    // vertex indices of facets
     core::TriangleMesh::FaceList const & faces = mesh->get_faces();
+    // number of facets
     std::size_t const num_faces = faces.size() / 3;
 
     ProgressCounter face_counter("\tAdding edges", num_faces);
     for (std::size_t i = 0; i < faces.size(); i += 3) {
         face_counter.progress<SIMPLE>();
 
+        //vertex index of facets
         std::size_t v1 = faces[i];
         std::size_t v2 = faces[i + 1];
         std::size_t v3 = faces[i + 2];

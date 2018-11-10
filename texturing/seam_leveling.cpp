@@ -18,6 +18,7 @@ find_seam_edges(UniGraph const & graph,
                 core::TriangleMesh::ConstPtr mesh,
                 std::vector<MeshEdge> * seam_edges) {
 
+    // all the facets
     core::TriangleMesh::FaceList const & faces = mesh->get_faces();
     seam_edges->clear();
 
@@ -36,11 +37,10 @@ find_seam_edges(UniGraph const & graph,
             /* Add only seam edges. */
             if (label1 == label2) continue;
 
-            /* Find shared edge of the faces. */
+            /* Find shared edge of the faces by finding the vertices contained by both two triangle. */
             std::vector<std::size_t> shared_edge;
             for (int i = 0; i < 3; ++i){
                 std::size_t v1 = faces[3 * node + i];
-
                 for (int j = 0; j < 3; j++){
                     std::size_t v2 = faces[3 * adj_node + j];
 

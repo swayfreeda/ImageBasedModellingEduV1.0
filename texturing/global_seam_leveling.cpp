@@ -50,9 +50,12 @@ find_seam_edges_for_vertex_label_combination(UniGraph const & graph, core::Trian
 
     assert(label1 != 0 && label2 != 0 && label1 < label2);
 
+    // all the vertices
     core::TriangleMesh::VertexList const & vertices = mesh->get_vertices();
 
+    // adjacent vertices of the specific vertex
     std::vector<std::size_t> const & adj_verts = vertex_infos->at(vertex).verts;
+
     for (std::size_t i = 0; i < adj_verts.size(); ++i) {
         std::size_t adj_vertex = adj_verts[i];
         if (vertex == adj_vertex) continue;
@@ -91,11 +94,13 @@ calculate_difference(VertexProjectionInfos const & vertex_projection_infos,
     assert(label1 != 0 && label2 != 0 && label1 < label2);
     assert(!seam_edges.empty());
 
+    // all the vertices
     core::TriangleMesh::VertexList const & vertices = mesh->get_vertices();
 
     math::Accum<math::Vec3f> color1_accum(math::Vec3f(0.0f));
     math::Accum<math::Vec3f> color2_accum(math::Vec3f(0.0f));
 
+    // for each seam edge
     for (MeshEdge const & seam_edge : seam_edges) {
         math::Vec3f v1 = vertices[seam_edge.v1];
         math::Vec3f v2 = vertices[seam_edge.v2];
@@ -142,6 +147,7 @@ global_seam_leveling(UniGraph const & graph,
                      std::vector<std::vector<VertexProjectionInfo> > const & vertex_projection_infos,
                      std::vector<TexturePatch::Ptr> * texture_patches) {
 
+    // get all the vertices
     core::TriangleMesh::VertexList const & vertices = mesh->get_vertices();
     std::size_t const num_vertices = vertices.size();
 
@@ -153,7 +159,7 @@ global_seam_leveling(UniGraph const & graph,
     labels.resize(num_vertices);
 
     /* Assign each vertex for each label a new index(row) within the solution vector x. */
-    // foreac vertex
+    // foreach vertex
     std::size_t x_row = 0;
     for (std::size_t i = 0; i < num_vertices; ++i) {
         std::set<std::size_t> label_set;
@@ -182,10 +188,14 @@ global_seam_leveling(UniGraph const & graph,
     std::size_t Gamma_row = 0;
     std::vector<Eigen::Triplet<float, int> > coefficients_Gamma;
     coefficients_Gamma.reserve(2 * num_vertices);
+    // for each vertex
     for (std::size_t i = 0; i < num_vertices; ++i) {
+        // for each label of the vertex
         for (std::size_t j = 0; j < labels[i].size(); ++j) {
+            // the i-th vertex's adjacent vertex
             std::vector<std::size_t> const & adj_verts = vertex_infos->at(i).verts;
             for (std::size_t k = 0; k < adj_verts.size(); ++k) {
+                // for each adjacent vertex
                 std::size_t adj_vertex = adj_verts[k];
                 for (std::size_t l = 0; l < labels[adj_vertex].size(); ++l) {
                     std::size_t label = labels[i][j];
@@ -211,8 +221,11 @@ global_seam_leveling(UniGraph const & graph,
     std::vector<Eigen::Triplet<float, int> > coefficients_A;
     std::vector<math::Vec3f> coefficients_b;
     std::size_t A_row = 0;
+    // for each vertex
     for (std::size_t i = 0; i < num_vertices; ++i) {
+        // for each label
         for (std::size_t j = 0; j < labels[i].size(); ++j) {
+            // for vertices with more than 1 labels
             for (std::size_t k = 0; k < labels[i].size(); ++k) {
                 std::size_t label1 = labels[i][j];
                 std::size_t label2 = labels[i][k];

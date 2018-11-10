@@ -57,7 +57,7 @@ struct TexturePatchCandidate {
 /** Create a TexturePatchCandidate by calculating
   * the faces' bounding box projected into the view,
   *  relative texture coordinates
-  *  and extacting the texture views relevant part
+  *  and extracting the texture views relevant part
   */
 TexturePatchCandidate
 generate_candidate(int label, TextureView const & texture_view,
@@ -115,7 +115,7 @@ generate_candidate(int label, TextureView const & texture_view,
             TexturePatch::create(label, faces, texcoords, image)};
     return texture_patch_candidate;
 }
-
+// generate texture patches
 void
 generate_texture_patches(UniGraph const & graph, core::TriangleMesh::ConstPtr mesh,
     core::VertexInfoList::ConstPtr vertex_infos,
@@ -138,7 +138,7 @@ generate_texture_patches(UniGraph const & graph, core::TriangleMesh::ConstPtr me
     #pragma omp parallel for schedule(dynamic)
     for (std::size_t i = 0; i < texture_views->size(); ++i) {
 
-        // get all the patches that are seedn from view i+1
+        // get all the patches that are seen from view i+1
         std::vector<std::vector<std::size_t> > subgraphs;
         int const label = i + 1;
         graph.get_subgraphs(label, &subgraphs);
@@ -206,8 +206,8 @@ generate_texture_patches(UniGraph const & graph, core::TriangleMesh::ConstPtr me
                     vertex_projection_infos->at(vertex_id).push_back(info);
                 }
             }
-        }
-    }
+        } // for each candidata
+    }  // for each texture view
 
     //  merge vertex projection information
     merge_vertex_projection_infos(vertex_projection_infos);

@@ -29,14 +29,14 @@ class TexturePatch {
     public:
         typedef std::shared_ptr<TexturePatch> Ptr;
         typedef std::shared_ptr<const TexturePatch> ConstPtr;
-        typedef std::vector<std::size_t> Faces;
-        typedef std::vector<math::Vec2f> Texcoords;
+        typedef std::vector<std::size_t> Faces;     //facets
+        typedef std::vector<math::Vec2f> Texcoords; // texcoords of vertices in Faces
 
     private:
-        int label;
-        Faces faces;
-        Texcoords texcoords;
-        core::FloatImage::Ptr image;
+        int label; // label of texture patch
+        Faces faces; // facets
+        Texcoords texcoords; // texcoords of each facet in Faces
+        core::FloatImage::Ptr image;  // image
         core::ByteImage::Ptr validity_mask;
         core::ByteImage::Ptr blending_mask;
 

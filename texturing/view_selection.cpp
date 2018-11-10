@@ -54,14 +54,14 @@ set_data_costs(std::vector<FaceInfo> const & face_infos, ST const & data_costs,
 
     /* Set data costs for all labels except label 0 (undefined) */
     for (std::size_t i = 0; i < data_costs.rows(); i++) {
-        ST::Row const & data_costs_for_label = data_costs.row(i);
+        ST::Row const & data_costs_for_label = data_costs.row(i);// != n_facets
 
         std::vector<std::vector<mrf::SparseDataCost> > costs(mrfs.size());
         for(std::size_t j = 0; j < data_costs_for_label.size(); j++) {
-            const std::size_t id = data_costs_for_label[j].first;
-            const float data_cost = data_costs_for_label[j].second;
-            const std::size_t component = face_infos[id].component;
-            const std::size_t cid = face_infos[id].id;
+            const std::size_t id = data_costs_for_label[j].first;    // id of facet
+            const float data_cost = data_costs_for_label[j].second;  // data cost of facet in the view
+            const std::size_t component = face_infos[id].component;  // component id
+            const std::size_t cid = face_infos[id].id;               // index in the mrf
             //TODO change index type of mrf::Graph
             costs[component].push_back({static_cast<int>(cid), data_cost});
         }
@@ -72,7 +72,7 @@ set_data_costs(std::vector<FaceInfo> const & face_infos, ST const & data_costs,
             mrfs[j]->set_data_costs(label, costs[j]);
         }
     }
-
+    // add the extra label
     for (std::size_t i = 0; i < mrfs.size(); ++i) {
         /* Set costs for undefined label */
         std::vector<mrf::SparseDataCost> costs(mrfs[i]->num_sites());
@@ -112,7 +112,7 @@ view_selection(ST const & data_costs, UniGraph * graph, Settings const & setting
     isolate_unseen_faces(&mgraph, data_costs);
 
     unsigned int num_components = 0;
-
+    // face infos store each faces's component index
     std::vector<FaceInfo> face_infos(mgraph.num_nodes());
     std::vector<std::vector<std::size_t> > components;
 
