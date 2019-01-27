@@ -98,7 +98,7 @@ convert_surf_descriptors(sfm::Surf::Descriptors const& surf_descr,
 }
 
 void
-feature_set_matching (core::ByteImage::Ptr image1, core::ByteImage::Ptr image2)
+feature_set_matching (core::ByteImage::Ptr image1, core::ByteImage::Ptr image2,std::string filename)
 {
     /*FeatureSet 计算并存储一个视角的特征点，包含SIFT和SURF特征点 */
     sfm::FeatureSet::Options feature_set_opts;
@@ -223,7 +223,8 @@ feature_set_matching (core::ByteImage::Ptr image1, core::ByteImage::Ptr image2)
 
     core::ByteImage::Ptr match_image = visualize_matching(
         matching, image1, image2, feat1.positions, feat2.positions);
-    std::string output_filename = "./tmp/matching_featureset.png";
+    std::string output_filename = filename;
+    //std::string output_filename = "/home/xsun/ImageBasedModellingEduV1.0/tmp/matching_featureset.png";
     std::cout << "Saving visualization to " << output_filename << std::endl;
     core::image::save_file(match_image, output_filename);
 }
@@ -231,9 +232,9 @@ feature_set_matching (core::ByteImage::Ptr image1, core::ByteImage::Ptr image2)
 int
 main (int argc, char** argv)
 {
-    if (argc < 3)
+    if (argc < 4)
     {
-        std::cerr << "Syntax: " << argv[0] << " image1 image2" << std::endl;
+        std::cerr << "Syntax: " << argv[0] << " image1 image2" << "output filename path"<<std::endl;
         return 1;
     }
 
@@ -270,7 +271,7 @@ main (int argc, char** argv)
     }
 
     // 进行特征提取和特征匹配
-    feature_set_matching(image1, image2);
+    feature_set_matching(image1, image2,argv[3]);
 
     return 0;
 }

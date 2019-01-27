@@ -15,6 +15,7 @@
 #include <cstring>
 #include <cerrno>
 #include <cstdlib>
+#include <assert.h>
 
 #include "core/depthmap.h"
 #include "core/mesh_info.h"
@@ -169,7 +170,7 @@ main (int argc, char** argv)
 
     /* Write mesh to disc. */
     std::cout << "Writing final point set (" << verts.size() << " points)..." << std::endl;
-    assert(util::string::right(arg.outmesh, 4) == ".ply");
+    assert(util::string::right(conf.outmesh, 4) == ".ply");
     {
         core::geom::SavePLYOptions opts;
         opts.write_vertex_normals = conf.with_normals;

@@ -157,9 +157,9 @@ Matching::oneway_match (Options const& options,
         /*
          * 参考标准1的形式给出lowe-ratio约束
          */
- //       float square_dist_1st_best = static_cast<float>(nn_result.dist_1st_best);
-//        float square_dist_2st_best = static_cast<float>(nn_result.dist_2nd_best);
-//        float const square_lowe_thres = MATH_POW2(options.lowe_ratio_threshold);
+        float square_dist_1st_best = static_cast<float>(nn_result.dist_1st_best);
+        float square_dist_2st_best = static_cast<float>(nn_result.dist_2nd_best);
+        float const square_lowe_thres = MATH_POW2(options.lowe_ratio_threshold);
 
                /*                  */
                /*    此处添加代码    */

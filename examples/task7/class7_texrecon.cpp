@@ -171,7 +171,7 @@ int main(int argc, char **argv) {
             colors[i][2] = rand()&255;
         }
 
-        std::ofstream out("./examples/task7/view_selection_result.ply");
+        std::ofstream out("./home/xsun/ImageBasedModellingEduV1.0/examples/data/sequence_scene/view_selection_result.ply");
         assert(out.is_open());
         out<<"ply"<<std::endl;
         out<<"format ascii 1.0"<<std::endl;

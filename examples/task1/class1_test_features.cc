@@ -28,9 +28,9 @@ sift_compare (features::Sift::Descriptor const& d1, features::Sift::Descriptor c
 int
 main (int argc, char** argv)
 {
-    if (argc < 2)
+    if (argc < 3)
     {
-        std::cerr << "Syntax: " << argv[0] << " <image>" << std::endl;
+        std::cerr << "Syntax: " << argv[0] << " <image>" << "out put file name path without .png format"<<std::endl;
         return 1;
     }
 
@@ -88,7 +88,8 @@ main (int argc, char** argv)
         sift_drawing, features::Visualizer::RADIUS_BOX_ORIENTATION);
 
     /* 保存图像文件名 */
-    std::string sift_out_fname = "./tmp/" + util::fs::replace_extension
+    std::string filename =argv[2];
+    std::string sift_out_fname = filename + util::fs::replace_extension
         (util::fs::basename(image_filename), "sift.png");
     std::cout << "保存图像: " << sift_out_fname << std::endl;
     core::image::save_file(sift_image, sift_out_fname);
